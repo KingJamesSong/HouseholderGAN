@@ -1,7 +1,7 @@
 Codes for StyleGAN
 
 
-##TO-DO LISTS
+*TO-DO LISTS*
 
 1. Reduce Number of Semantic Attributes (10 --> 5).
 2. Adjust Traversal Range (e.g., from -10 to 10 or from -5 to 5).
