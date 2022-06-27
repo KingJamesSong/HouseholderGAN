@@ -191,6 +191,16 @@ class EqualLinear(nn.Module):
         return (
             f"{self.__class__.__name__}({self.weight.shape[1]}, {self.weight.shape[0]})"
         )
+    #Initilization for orthogonal linear layer
+    def intialize(self, weight_matrix):
+        if self.is_ortho:
+            with torch.no_grad():
+                UX,_,VX = torch.svd(weight_matrix)
+                hu, tauu = torch.geqrf(UX)
+                hv, tauv = torch.geqrf(VX)
+                self.U = torch.nn.Parameter(hu)
+                self.V = torch.nn.Parameter(hv)
+            
 
 class ModulatedConv2d(nn.Module):
     def __init__(
