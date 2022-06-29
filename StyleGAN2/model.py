@@ -195,11 +195,14 @@ class EqualLinear(nn.Module):
     def intialize(self, weight_matrix):
         if self.is_ortho:
             with torch.no_grad():
-                UX,_,VX = torch.svd(weight_matrix)
+                UX,SS,VX = torch.svd(weight_matrix)
+                mean_eig = SS[:10].mean()
                 hu, tauu = torch.geqrf(UX)
                 hv, tauv = torch.geqrf(VX)
                 self.U = torch.nn.Parameter(hu)
                 self.V = torch.nn.Parameter(hv)
+                for i in range(10):
+                    self.S[i, i] = mean_eig
             
 
     def intialize(self, weight_matrix):
