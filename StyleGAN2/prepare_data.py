@@ -106,7 +106,6 @@ if __name__ == "__main__":
         help="resampling methods for resizing images",
     )
     parser.add_argument("path", type=str, help="path to the image dataset")
-
     args = parser.parse_args()
 
     resample_map = {"lanczos": Image.LANCZOS, "bilinear": Image.BILINEAR}

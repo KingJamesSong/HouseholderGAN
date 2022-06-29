@@ -21,6 +21,7 @@ if __name__ == "__main__":
     )
 
 
+
     args = parser.parse_args()
 
     if args.is_ortho:
@@ -31,12 +32,13 @@ if __name__ == "__main__":
 
 
         for k, v in ckpt["g_ema"].items():
-
-            print(k)
             if '.U' in k:
                 U = v
+
+                print(k)
             if '.V' in k:
                 V = v
+                print(k)
         if U is not None and V is not None:
             d1 = U.shape[0]
             d2 = V.shape[0]
@@ -62,10 +64,9 @@ if __name__ == "__main__":
 
         weight_mat = []
         for k, v in modulate.items():
-            print('v', v.shape)
             weight_mat.append(v)
 
-        W = torch.cat(weight_mat[0], 0)
+        W = weight_mat[4]
         eigvec = torch.svd(W).V.to("cpu")
 
     print('eigvec', eigvec.shape)

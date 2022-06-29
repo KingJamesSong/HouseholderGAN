@@ -6,6 +6,8 @@ from model import Generator
 import numpy as np
 import os
 
+torch.random.manual_seed(15927)
+
 if __name__ == "__main__":
     torch.set_grad_enabled(False)
 
@@ -64,6 +66,14 @@ if __name__ == "__main__":
         help="name of the closed form factorization result factor file",
     )
 
+    parser.add_argument(
+        "--ortho_id",
+        type=int,
+        default=1,
+        help="name of the closed form factorization result factor file",
+    )
+
+
 
 
     args = parser.parse_args()
@@ -74,7 +84,8 @@ if __name__ == "__main__":
 
     eigvec = torch.load(args.factor)["eigvec"].to(args.device)
     ckpt = torch.load(args.ckpt)
-    g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, is_ortho=args.is_ortho).to(args.device)
+    g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id).to(args.device)
+
     g.load_state_dict(ckpt["g_ema"], strict=False)
 
     trunc = g.mean_latent(4096)
@@ -91,23 +102,24 @@ if __name__ == "__main__":
 
     print(eigvec)
 
-    imglists = [img]
-    for i in np.linspace(-5, 5, 5):
+    for j in range(12):
+        imglists = []
+        for i in np.linspace(-10, 10, 20):
 
-        direction = i * eigvec[:, args.index].unsqueeze(0)
+            direction = i * eigvec[:, j].unsqueeze(0)
 
-        img1, _ = g(
-            [latent + direction],
-            truncation=args.truncation,
-            truncation_latent=trunc,
-            input_is_latent=True,
+            img1, _ = g(
+                [latent + direction],
+                truncation=args.truncation,
+                truncation_latent=trunc,
+                input_is_latent=True,
+            )
+            imglists.append(img1)
+
+        imgs = torch.cat(imglists, dim=0)
+        grid = utils.save_image(imgs,
+            os.path.join(args.output_dir, f"{args.out_prefix}_index-{j}__all.png"),
+            normalize=True,
+            range=(-1, 1),
+            nrow=args.n_sample,
         )
-        imglists.append(img1)
-
-    imgs = torch.cat(imglists, dim=0)
-    grid = utils.save_image(imgs,
-        os.path.join(args.output_dir, f"{args.out_prefix}_index-{args.index}__all.png"),
-        normalize=True,
-        range=(-1, 1),
-        nrow=args.n_sample,
-    )

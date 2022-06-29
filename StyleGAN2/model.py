@@ -192,6 +192,17 @@ class EqualLinear(nn.Module):
             f"{self.__class__.__name__}({self.weight.shape[1]}, {self.weight.shape[0]})"
         )
 
+    def intialize(self, weight_matrix):
+        if self.is_ortho:
+            with torch.no_grad():
+                UX, _, VX = torch.svd(weight_matrix)
+                hu, tauu = torch.geqrf(UX)
+                hv, tauv = torch.geqrf(VX)
+                self.U.data.copy_(hu)
+                self.V.data.copy_(hv)
+                # self.V = torch.nn.Parameter(hv)
+
+
 class ModulatedConv2d(nn.Module):
     def __init__(
         self,
@@ -435,7 +446,7 @@ class Generator(nn.Module):
         channel_multiplier=2,
         blur_kernel=[1, 3, 3, 1],
         lr_mlp=0.01,
-        is_ortho=False
+        ortho_id=0,
     ):
         super().__init__()
 
@@ -466,14 +477,24 @@ class Generator(nn.Module):
             1024: 16 * channel_multiplier,
         }
 
+
         self.input = ConstantInput(self.channels[4])
         self.conv1 = StyledConv(
-            self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel, is_ortho=is_ortho
+            self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel, is_ortho=False
         )
         self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)
 
         self.log_size = int(math.log(size, 2))
         self.num_layers = (self.log_size - 2) * 2 + 1
+
+        ortho_list = [False] * (self.log_size - 2)
+
+        # if ortho_id == -1, means without using orthoMatrix.
+        if ortho_id == -1:
+            ortho_list = ortho_list
+        else:
+            for i in range(self.log_size - 2):
+                ortho_list[i] = (i == ortho_id)
 
         self.convs = nn.ModuleList()
         self.upsamples = nn.ModuleList()
@@ -498,14 +519,23 @@ class Generator(nn.Module):
                     style_dim,
                     upsample=True,
                     blur_kernel=blur_kernel,
+                    is_ortho=ortho_list[i-3]
                 )
             )
 
             self.convs.append(
                 StyledConv(
-                    out_channel, out_channel, 3, style_dim, blur_kernel=blur_kernel
+                    out_channel, out_channel, 3, style_dim, blur_kernel=blur_kernel,
+                    is_ortho=False
                 )
             )
+
+            # self.convs.append(
+            #     StyledConv(
+            #         out_channel, out_channel, 3, style_dim, blur_kernel=blur_kernel,
+            #         is_ortho=ortho_list[i-3]
+            #     )
+            # )
 
             self.to_rgbs.append(ToRGB(out_channel, style_dim))
 

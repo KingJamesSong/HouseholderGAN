@@ -9,4 +9,5 @@ eval "$(conda shell.bash hook)"
 bash
 
 conda activate styleganv2
-python closed_form_factorization.py --out ./factor/factorv3_layer4v4.pt ./checkpoint_FFHQv9/560000.pt --is_ortho
+
+python apply_factor.py --index 0 --output_dir output_SeFA4 --ckpt ./checkpoint_FFHQ/550000.pt --factor ./factor/factor_SaFA4.pt --ortho_id -1

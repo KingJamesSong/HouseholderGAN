@@ -448,7 +448,6 @@ def apply_color(img, mat):
 
     return img
 
-
 def random_apply_color(img, p, C=None):
     if C is None:
         C = sample_color(p, img.shape[0])

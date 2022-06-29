@@ -561,6 +561,7 @@ from torch.utils import data
 import torch.distributed as dist
 from torchvision import transforms, utils
 from tqdm import tqdm
+from model import EqualLinear
 
 try:
     import wandb
@@ -852,7 +853,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     }
                 )
 
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 with torch.no_grad():
                     g_ema.eval()
                     sample, _ = g_ema([sample_z])
@@ -864,7 +865,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         range=(-1, 1),
                     )
 
-            if i % 100 == 0:
+            if i % 500 == 0:
                 torch.save(
                     {
                         "g": g_module.state_dict(),
@@ -979,10 +980,15 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--is_ortho",
-        action="store_true",
+        "--ortho_id",
+        type=int,
+        default=1,
         help="name of the closed form factorization result factor file",
     )
+
+    parser.add_argument("--checkpoints_dir", type=str, help="path to checkpoints_dir")
+
+    parser.add_argument("--sample_dir", type=str, help="path to sample dir")
 
     args = parser.parse_args()
 
@@ -1006,14 +1012,14 @@ if __name__ == "__main__":
         from swagan import Generator, Discriminator
 
     generator = Generator(
-        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier,is_ortho = args.is_ortho
+        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier,ortho_id = args.ortho_id
 
     ).to(device)
     discriminator = Discriminator(
         args.size, channel_multiplier=args.channel_multiplier
     ).to(device)
     g_ema = Generator(
-        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier, is_ortho=args.is_ortho
+        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id
     ).to(device)
     g_ema.eval()
     accumulate(g_ema, generator, 0)
@@ -1031,7 +1037,7 @@ if __name__ == "__main__":
 
     print('training_parameters', len(training_parameters))
 
-    g_optim = optim.Adam(training_parameters,
+    g_optim = optim.Adam(generator.parameters(),
         lr=args.lr * g_reg_ratio,
         betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
     )
@@ -1054,11 +1060,25 @@ if __name__ == "__main__":
             pass
 
         generator.load_state_dict(ckpt["g"], strict=False)
-        #discriminator.load_state_dict(ckpt["d"], strict=False)
+        discriminator.load_state_dict(ckpt["d"], strict=False)
         g_ema.load_state_dict(ckpt["g_ema"], strict=False)
 
         # g_optim.load_state_dict(ckpt["g_optim"])
         # d_optim.load_state_dict(ckpt["d_optim"])
+
+        print(ckpt["g"].keys())
+
+        model_state_dict = ckpt["g"]
+        for name, layer in generator.convs.named_modules():
+            if 'modulation' in name:
+                weight = model_state_dict['convs.'+ name + '.weight']
+                layer.intialize(weight)
+
+        model_state_dict = ckpt["g_ema"]
+        for name, layer in g_ema.convs.named_modules():
+            if 'modulation' in name:
+                weight = model_state_dict['convs.'+ name + '.weight']
+                layer.intialize(weight)
 
     if args.distributed:
         generator = nn.parallel.DistributedDataParallel(
@@ -1095,8 +1115,8 @@ if __name__ == "__main__":
     if get_rank() == 0 and wandb is not None and args.wandb:
         wandb.init(project="stylegan 2")
 
-    checkpoints_dir = './checkpoint_FFHQ_v3'
-    sample_dir = './sample_v3'
+    checkpoints_dir = args.checkpoints_dir
+    sample_dir = args.sample_dir
 
     if not os.path.exists(checkpoints_dir):
         os.mkdir(checkpoints_dir)
