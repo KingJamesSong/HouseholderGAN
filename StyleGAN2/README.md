@@ -8,3 +8,36 @@ Try more and all layers.
 Increase Training Steps (1k to 10k).
 Weight Initialization at 0k steps (Nearest-Orthogonal Mapping).
 Study Related Work (SeFA, GANSpace)
+
+2020.7.1
+
+1) ortho all layers + training partial parameters + with loading d
+
+2) ortho all layers + training partial parameters + without loading d
+
+3) ortho all layers + training all parameters + with loading d
+
+2020.7.6:
+
+Discussion:
+
+1) Limited semantic discovery.
+
+2) G(a + n * d1) = G(a + n * d2) or
+
+  G(a + n * d1) = G(a - n * d2)
+  
+3) loading Discriminator is necessary.
+
+4) Training all parameters will improve the quality of generated samples and preserve the identity, but discovers
+the limited discovery.
+
+Experiments: 
+
+1) Increasing BatchSize from 2 to 48
+
+2) FID.
+
+3) Rank of the matrix: 5, 10, 20.
+
+4) ortho gradient.
