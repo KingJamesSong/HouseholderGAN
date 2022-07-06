@@ -15,7 +15,7 @@ Study Related Work (SeFA, GANSpace)
 
 2) ortho all layers + training partial parameters + without loading d
 
-3) ortho all layers + training all parameters + with loading d
+3) ortho all layers + training all parameters + with loading d (Preferred)
 
 2020.7.6:
 
@@ -34,7 +34,9 @@ the limited discovery.
 
 Experiments: 
 
-1) Increasing BatchSize from 2 to 48
+1) Increasing BatchSize from 2 to 48 (useful, significantly increase diversity and hierachy).
+
+2) Loss to increase num of semantics.
 
 2) FID.
 
