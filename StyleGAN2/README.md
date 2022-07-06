@@ -43,3 +43,12 @@ Experiments:
 3) Rank of the matrix: 5, 10, 20.
 
 4) ortho gradient.
+
+\bf{2022.7.6 2nd meeting}:
+
+1) Re-run SeFa experiements;
+2) Implement orthogonal loss to solve semantic-asymmetry;
+3) FID and VP;
+4) Re-run previous experiments.
+
+
