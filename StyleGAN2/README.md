@@ -15,7 +15,7 @@ Study Related Work (SeFA, GANSpace)
 
 2) ortho all layers + training partial parameters + without loading d
 
-3) ortho all layers + training all parameters + with loading d (Preferred)
+3) ##ortho all layers + training all parameters + with loading d (Preferred)##
 
 2020.7.6:
 
