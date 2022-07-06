@@ -38,7 +38,7 @@ Experiments:
 
 2) Loss to increase num of semantics.
 
-2) FID.
+2) FID and VP.
 
 3) Rank of the matrix: 5, 10, 20.
 
