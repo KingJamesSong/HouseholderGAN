@@ -10,4 +10,4 @@ bash
 
 conda activate styleganv2
 
-python closed_form_factorization.py --out ./factor/factor_SaFA4.pt ./checkpoint_FFHQ/550000.pt
+python closed_form_factorization.py --out ./factor/factor_SaFA.pt ./checkpoint_FFHQ/550000.pt

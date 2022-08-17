@@ -836,7 +836,6 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                     f"augment: {ada_aug_p:.4f}"
                 )
             )
-
             if wandb and args.wandb:
                 wandb.log(
                     {
@@ -865,7 +864,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
                         range=(-1, 1),
                     )
 
-            if i % 500 == 0:
+            if i % 1000 == 0:
                 torch.save(
                     {
                         "g": g_module.state_dict(),
@@ -986,6 +985,22 @@ if __name__ == "__main__":
         help="name of the closed form factorization result factor file",
     )
 
+    parser.add_argument(
+        "--diag_size",
+        type=int,
+        default=1,
+        help="size of idenity matrix to ",
+    )
+
+    parser.add_argument(
+        "--loadd", action="store_true", help="whether loading d"
+    )
+
+    parser.add_argument(
+        "--training_FULL", action="store_true", help="whether training for all parameters of the generator"
+    )
+
+
     parser.add_argument("--checkpoints_dir", type=str, help="path to checkpoints_dir")
 
     parser.add_argument("--sample_dir", type=str, help="path to sample dir")
@@ -1012,14 +1027,14 @@ if __name__ == "__main__":
         from swagan import Generator, Discriminator
 
     generator = Generator(
-        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier,ortho_id = args.ortho_id
+        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier,ortho_id = args.ortho_id, diag_size=args.diag_size
 
     ).to(device)
     discriminator = Discriminator(
         args.size, channel_multiplier=args.channel_multiplier
     ).to(device)
     g_ema = Generator(
-        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id
+        args.size, args.latent, args.n_mlp, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id, diag_size=args.diag_size
     ).to(device)
     g_ema.eval()
     accumulate(g_ema, generator, 0)
@@ -1037,10 +1052,18 @@ if __name__ == "__main__":
 
     print('training_parameters', len(training_parameters))
 
-    g_optim = optim.Adam(generator.parameters(),
-        lr=args.lr * g_reg_ratio,
-        betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
-    )
+    if args.training_FULL:
+        g_optim = optim.Adam(generator.parameters(),
+            lr=args.lr * g_reg_ratio,
+            betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
+        )
+    else:
+
+        g_optim = optim.Adam(training_parameters,
+            lr=args.lr * g_reg_ratio,
+            betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
+        )
+
     d_optim = optim.Adam(
         discriminator.parameters(),
         lr=args.lr * d_reg_ratio,
@@ -1060,18 +1083,19 @@ if __name__ == "__main__":
             pass
 
         generator.load_state_dict(ckpt["g"], strict=False)
-        discriminator.load_state_dict(ckpt["d"], strict=False)
+
+        if args.loadd:
+            discriminator.load_state_dict(ckpt["d"], strict=False)
+
         g_ema.load_state_dict(ckpt["g_ema"], strict=False)
 
         # g_optim.load_state_dict(ckpt["g_optim"])
         # d_optim.load_state_dict(ckpt["d_optim"])
-
-        print(ckpt["g"].keys())
-
         model_state_dict = ckpt["g"]
         for name, layer in generator.convs.named_modules():
             if 'modulation' in name:
                 weight = model_state_dict['convs.'+ name + '.weight']
+                print(name, weight.shape)
                 layer.intialize(weight)
 
         model_state_dict = ckpt["g_ema"]

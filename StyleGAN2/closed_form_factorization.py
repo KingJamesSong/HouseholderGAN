@@ -20,16 +20,24 @@ if __name__ == "__main__":
         help="name of the closed form factorization result factor file",
     )
 
+    parser.add_argument(
+        "--diag_size",
+        type=int,
+        default=1,
+        help="size of idenity matrix to ",
+    )
+
 
 
     args = parser.parse_args()
 
     if args.is_ortho:
         ckpt = torch.load(args.ckpt)
-        weight_mat =  []
+        #weight_mat =  []
         U = None
         V = None
 
+        eigvec_ = {}
 
         for k, v in ckpt["g_ema"].items():
             if '.U' in k:
@@ -39,21 +47,28 @@ if __name__ == "__main__":
             if '.V' in k:
                 V = v
                 print(k)
-        if U is not None and V is not None:
-            d1 = U.shape[0]
-            d2 = V.shape[0]
 
-            S = torch.zeros(d1, d2).to(U)
-            for i in range(10):
-                S[i, i] = 1
+            if U is not None and V is not None:
+                d1 = U.shape[0]
+                d2 = V.shape[0]
 
-            if d1 < d2:
-                weight = Q(U).mm(S).mm(Q(V))
-            else:
-                weight = Q(U).mm(S).mm(Q(V))
-            weight_mat.append(weight)
-        weight = torch.cat(weight_mat, 0)
-        eigvec = torch.svd(weight).V.to("cpu")
+                S = torch.zeros(d1, d2).to(U)
+                for i in range(args.diag_size):
+                    S[i, i] = 1
+
+                if d1 < d2:
+                    weight = Q(U).mm(S).mm(Q(V))
+                else:
+                    weight = Q(U).mm(S).mm(Q(V))
+
+                U = None
+                V = None
+
+                eigvec = torch.svd(weight).V.to("cpu")
+
+                eigvec_[k] = eigvec
+
+        torch.save(eigvec_, args.out)
     else:
         ckpt = torch.load(args.ckpt)
         modulate = {
@@ -63,19 +78,23 @@ if __name__ == "__main__":
         }
 
         weight_mat = []
+        eigvec_ = {}
         for k, v in modulate.items():
-            weight_mat.append(v)
+            # weight_mat.append(v)
+            eigvec = torch.svd(v).V.to("cpu")
+            eigvec_[k] = eigvec
 
-        W = weight_mat[4]
-        eigvec = torch.svd(W).V.to("cpu")
-
-    print('eigvec', eigvec.shape)
+        torch.save(eigvec_, args.out)
+    #     W = weight_mat[4]
+    #     eigvec = torch.svd(W).V.to("cpu")
+    #
+    # print('eigvec', eigvec.shape)
 
     # print(args.out)
     # if not os.path.exists(args.out):
     # os.mkdir(args.out)
 
-    print('1')
-    torch.save({"ckpt": args.ckpt, "eigvec": eigvec}, args.out)
-    print('2')
+    # print('1')
+    # torch.save({"ckpt": args.ckpt, "eigvec": eigvec}, args.out)
+    # print('2')
 

@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--output_dir",
         type=str,
-        default='output_dir',
+        default='output_vp_pairs',
         help="name of the closed form factorization result factor file",
     )
 
@@ -73,59 +73,79 @@ if __name__ == "__main__":
         help="name of the closed form factorization result factor file",
     )
 
-    parser.add_argument(
-        "--diag_size",
-        type=int,
-        default=1,
-        help="size of idenity matrix to ",
-    )
-
-
     args = parser.parse_args()
 
     if not os.path.exists(args.output_dir):
         os.mkdir(args.output_dir)
 
+    args.output_dir_FID = args.output_dir + '_FID'
+    if not os.path.exists(args.output_dir_FID):
+        os.mkdir(args.output_dir_FID)
+
     print('args', args.factor)
     eigvec_dict = torch.load(args.factor)
 
     ckpt = torch.load(args.ckpt)
-    g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id, diag_size=args.diag_size).to(args.device)
+    g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id).to(args.device)
 
     g.load_state_dict(ckpt["g_ema"], strict=False)
 
     trunc = g.mean_latent(4096)
+    print(eigvec_dict.keys())
 
-    latent = torch.randn(args.n_sample, 512, device=args.device)
-    latent = g.get_latent(latent)
+    labels = []
+    for i in range(10000):
 
-    img, _ = g(
-        [latent],
-        truncation=args.truncation,
-        truncation_latent=trunc,
-        input_is_latent=True
-    )
+        latent = torch.randn(1, 512, device=args.device)
+        latent = g.get_latent(latent)
 
-    for index, key in enumerate(eigvec_dict.keys()):
+        key = np.random.randint(1,7) * 2
+        j = np.random.randint(0, 10)
 
-        for j in range(args.diag_size):
-            imglists = []
-            for i in np.linspace(-20, 20, 11):
-                direction = i * eigvec_dict[key][:, j].unsqueeze(0).to(args.device)
-                img1, _ = g.forward_test(
-                    [latent],
-                    direction,
-                    index,
-                    truncation=args.truncation,
-                    truncation_latent=trunc,
-                    input_is_latent=True,
-                )
-                imglists.append(img1)
+        delta_onehot = np.zeros((1, 6 * 10))
+        delta_onehot[:, (key // 2 - 1) * 10 + j] = 1
 
-            imgs = torch.cat(imglists, dim=0)
-            grid = utils.save_image(imgs,
-                os.path.join(args.output_dir, f"{args.out_prefix}_layer-{index}-index-{j}__all.png"),
-                normalize=True,
-                range=(-1, 1),
-                nrow=args.n_sample,
-            )
+        if i == 0:
+            labels = delta_onehot
+        else:
+            labels = np.concatenate([labels, delta_onehot], axis=0)
+
+        value_list = list(eigvec_dict.values())[key]
+
+        direction = 5 * value_list[:, j].unsqueeze(0).to(args.device)
+        img1, _ = g.forward_test(
+            [latent],
+            direction,
+            key,
+            truncation=args.truncation,
+            truncation_latent=trunc,
+            input_is_latent=True,
+        )
+        img0, _ = g.forward_test(
+            [latent],
+            torch.zeros_like(direction),
+            key,
+            truncation=args.truncation,
+            truncation_latent=trunc,
+            input_is_latent=True,
+        )
+
+        imgs = torch.cat([img0, img1], dim=3)
+
+        utils.save_image(imgs,
+            os.path.join(args.output_dir, 'pair_%06d.png' % (i)),
+            normalize=True,
+            range=(-1, 1),
+            nrow=args.n_sample,
+        )
+
+        utils.save_image(img0,
+            os.path.join(args.output_dir_FID, '%06d.png' % (i)),
+            normalize=True,
+            range=(-1, 1),
+            nrow=args.n_sample,
+        )
+
+    np.save(os.path.join(args.output_dir, 'labels.npy'), labels)
+
+

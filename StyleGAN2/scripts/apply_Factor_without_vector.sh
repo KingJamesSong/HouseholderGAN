@@ -9,6 +9,6 @@ eval "$(conda shell.bash hook)"
 bash
 
 conda activate styleganv2
-
-python apply_factor.py --index 0 --output_dir output_v1_0 --ckpt  \
-            ./checkpoint_FFHQ/551000.pt --factor ./factor/factorv2.pt
+python apply_factor.py --index 0 --output_dir output_without_vector \
+  --ckpt ./checkpoint_FFHQ/550000.pt \
+   --factor ./factor/factorv3_layer_loadd_all_partial.pt --ortho_id -1

@@ -9,4 +9,5 @@ eval "$(conda shell.bash hook)"
 bash
 
 conda activate styleganv2
-python closed_form_factorization.py --out ./factor/factorv3_layer4v4.pt ./checkpoint_FFHQv9/560000.pt --is_ortho
+python closed_form_factorization.py --out ./factor/factorv3_layer_loadd_all_FULL.pt \
+      ./checkpoint_FFHQ_loadd_all_FULL/555000.pt --is_ortho

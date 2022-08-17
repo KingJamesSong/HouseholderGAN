@@ -129,7 +129,7 @@ class EqualConv2d(nn.Module):
 
 class EqualLinear(nn.Module):
     def __init__(
-        self, in_dim, out_dim, bias=True, bias_init=0, lr_mul=1, activation=None, is_ortho=False
+        self, in_dim, out_dim, bias=True, bias_init=0, lr_mul=1, activation=None, is_ortho=False, diag_size=10,
     ):
         super().__init__()
 
@@ -139,12 +139,12 @@ class EqualLinear(nn.Module):
 
         if is_ortho:
 
-            self.S = torch.zeros(in_dim, out_dim)
+            self.S = torch.zeros(out_dim, in_dim)
             self.S.requires_grad = False
-            for i in range(10):
+            for i in range(diag_size):
                 self.S[i, i] = 1
-            self.U = torch.nn.Parameter(torch.zeros((in_dim, in_dim)).normal_(0, 0.05))
-            self.V = torch.nn.Parameter(torch.zeros((out_dim, out_dim)).normal_(0, 0.05))
+            self.U = torch.nn.Parameter(torch.zeros((out_dim, out_dim)).normal_(0, 0.05))
+            self.V = torch.nn.Parameter(torch.zeros((in_dim, in_dim)).normal_(0, 0.05))
             self.scale = 1
 
         else:
@@ -191,30 +191,27 @@ class EqualLinear(nn.Module):
         return (
             f"{self.__class__.__name__}({self.weight.shape[1]}, {self.weight.shape[0]})"
         )
-    #Initilization for orthogonal linear layer
-    def intialize(self, weight_matrix):
-        if self.is_ortho:
-            with torch.no_grad():
-                UX,SS,VX = torch.svd(weight_matrix)
-                mean_eig = SS[:10].mean()
-                hu, tauu = torch.geqrf(UX)
-                hv, tauv = torch.geqrf(VX)
-                self.U = torch.nn.Parameter(hu)
-                self.V = torch.nn.Parameter(hv)
-                for i in range(10):
-                    self.S[i, i] = mean_eig
-            
 
     def intialize(self, weight_matrix):
         if self.is_ortho:
             with torch.no_grad():
-                UX, _, VX = torch.svd(weight_matrix)
+                UX, SS, VX = torch.svd(weight_matrix, some=False)
                 hu, tauu = torch.geqrf(UX)
                 hv, tauv = torch.geqrf(VX)
                 self.U.data.copy_(hu)
                 self.V.data.copy_(hv)
-                # self.V = torch.nn.Parameter(hv)
+                # for i in range(10):
+                #     self.S.data[i,i].copy_(mean_eig)
 
+    # def intialize(self, weight_matrix):
+    #     if self.is_ortho:
+    #         with torch.no_grad():
+    #             UX, _, VX = torch.svd(weight_matrix)
+    #             hu, tauu = torch.geqrf(UX)
+    #             hv, tauv = torch.geqrf(VX)
+    #             self.U.data.copy_(hu)
+    #             self.V.data.copy_(hv)
+    #             # self.V = torch.nn.Parameter(hv)
 
 class ModulatedConv2d(nn.Module):
     def __init__(
@@ -228,7 +225,8 @@ class ModulatedConv2d(nn.Module):
         downsample=False,
         blur_kernel=[1, 3, 3, 1],
         fused=True,
-        is_ortho = False
+        is_ortho = False,
+        diag_size = 10
     ):
         super().__init__()
 
@@ -264,7 +262,7 @@ class ModulatedConv2d(nn.Module):
             torch.randn(1, out_channel, in_channel, kernel_size, kernel_size)
         )
 
-        self.modulation = EqualLinear(style_dim, in_channel, bias_init=1, is_ortho=is_ortho)
+        self.modulation = EqualLinear(style_dim, in_channel, bias_init=1, is_ortho=is_ortho, diag_size=diag_size)
         self.demodulate = demodulate
         self.fused = fused
 
@@ -396,7 +394,8 @@ class StyledConv(nn.Module):
         upsample=False,
         blur_kernel=[1, 3, 3, 1],
         demodulate=True,
-        is_ortho= False
+        is_ortho= False,
+        diag_size = 10
 
     ):
         super().__init__()
@@ -410,7 +409,8 @@ class StyledConv(nn.Module):
             upsample=upsample,
             blur_kernel=blur_kernel,
             demodulate=demodulate,
-            is_ortho = is_ortho
+            is_ortho = is_ortho,
+            diag_size=diag_size
         )
 
         self.noise = NoiseInjection()
@@ -460,6 +460,7 @@ class Generator(nn.Module):
         blur_kernel=[1, 3, 3, 1],
         lr_mlp=0.01,
         ortho_id=0,
+        diag_size=10,
     ):
         super().__init__()
 
@@ -493,7 +494,7 @@ class Generator(nn.Module):
 
         self.input = ConstantInput(self.channels[4])
         self.conv1 = StyledConv(
-            self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel, is_ortho=False
+            self.channels[4], self.channels[4], 3, style_dim, blur_kernel=blur_kernel, is_ortho=False, diag_size=diag_size
         )
         self.to_rgb1 = ToRGB(self.channels[4], style_dim, upsample=False)
 
@@ -505,6 +506,8 @@ class Generator(nn.Module):
         # if ortho_id == -1, means without using orthoMatrix.
         if ortho_id == -1:
             ortho_list = ortho_list
+        elif ortho_id == -2:
+            ortho_list = [True] * (self.log_size - 2)
         else:
             for i in range(self.log_size - 2):
                 ortho_list[i] = (i == ortho_id)
@@ -532,14 +535,16 @@ class Generator(nn.Module):
                     style_dim,
                     upsample=True,
                     blur_kernel=blur_kernel,
-                    is_ortho=ortho_list[i-3]
+                    is_ortho=ortho_list[i-3],
+                    diag_size=diag_size
                 )
             )
 
             self.convs.append(
                 StyledConv(
                     out_channel, out_channel, 3, style_dim, blur_kernel=blur_kernel,
-                    is_ortho=False
+                    is_ortho=False,
+                    diag_size=diag_size
                 )
             )
 
@@ -620,6 +625,7 @@ class Generator(nn.Module):
                 latent = styles[0]
 
         else:
+
             if inject_index is None:
                 inject_index = random.randint(1, self.n_latent - 1)
 
@@ -648,6 +654,89 @@ class Generator(nn.Module):
 
         else:
             return image, None
+
+
+    def forward_test(
+        self,
+        styles,
+        direction,
+        index,
+        return_latents=False,
+        inject_index=None,
+        truncation=1,
+        truncation_latent=None,
+        input_is_latent=False,
+        noise=None,
+        randomize_noise=True,
+    ):
+
+        if not input_is_latent:
+            styles = [self.style(s) for s in styles]
+
+        if noise is None:
+            if randomize_noise:
+                noise = [None] * self.num_layers
+            else:
+                noise = [
+                    getattr(self.noises, f"noise_{i}") for i in range(self.num_layers)
+                ]
+
+
+        if truncation < 1:
+            style_t = []
+
+            for style in styles:
+                style_t.append(
+                    truncation_latent + truncation * (style - truncation_latent)
+                )
+
+            styles = style_t
+
+        if len(styles) < 2:
+            inject_index = self.n_latent
+
+            if styles[0].ndim < 3:
+                latent = styles[0].unsqueeze(1).repeat(1, inject_index, 1)
+            else:
+                latent = styles[0]
+
+            
+            latent[:, (index + 1) * 2 - 1 : (index + 1) * 2, :] \
+                = latent[:, (index + 1) * 2 - 1 : (index + 1) * 2, :] + direction
+
+
+        else:
+
+            if inject_index is None:
+                inject_index = random.randint(1, self.n_latent - 1)
+
+            latent = styles[0].unsqueeze(1).repeat(1, inject_index, 1)
+            latent2 = styles[1].unsqueeze(1).repeat(1, self.n_latent - inject_index, 1)
+
+            latent = torch.cat([latent, latent2], 1)
+
+        out = self.input(latent)
+        out = self.conv1(out, latent[:, 0], noise=noise[0])
+        skip = self.to_rgb1(out, latent[:, 1])
+
+        i = 1
+        for conv1, conv2, noise1, noise2, to_rgb in zip(
+            self.convs[::2], self.convs[1::2], noise[1::2], noise[2::2], self.to_rgbs
+        ):
+
+            out = conv1(out, latent[:, i], noise=noise1)
+            out = conv2(out, latent[:, i + 1], noise=noise2)
+            skip = to_rgb(out, latent[:, i + 2], skip)
+
+            i += 2
+
+        image = skip
+        if return_latents:
+            return image, latent
+
+        else:
+            return image, None
+
 
 class ConvLayer(nn.Sequential):
     def __init__(
