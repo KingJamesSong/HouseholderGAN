@@ -981,7 +981,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ortho_id",
         type=int,
-        default=1,
+        default=-2,
         help="name of the closed form factorization result factor file",
     )
 
@@ -1042,22 +1042,22 @@ if __name__ == "__main__":
     g_reg_ratio = args.g_reg_every / (args.g_reg_every + 1)
     d_reg_ratio = args.d_reg_every / (args.d_reg_every + 1)
 
-    training_parameters = []
-    for n, p in generator.named_parameters():
-        if '.U' in n or '.V' in n:
-            p.requires_grad = True
-            training_parameters.append(p)
-        else:
-            p.requires_grad = False
-
-    print('training_parameters', len(training_parameters))
-
     if args.training_FULL:
         g_optim = optim.Adam(generator.parameters(),
             lr=args.lr * g_reg_ratio,
             betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
         )
+        print('training_parameters', len(generator.parameters()))
     else:
+        training_parameters = []
+        for n, p in generator.named_parameters():
+            if '.U' in n or '.V' in n:
+                p.requires_grad = True
+                training_parameters.append(p)
+            else:
+                p.requires_grad = False
+
+        print('training_parameters', len(training_parameters))
 
         g_optim = optim.Adam(training_parameters,
             lr=args.lr * g_reg_ratio,
