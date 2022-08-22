@@ -5,6 +5,25 @@ from torchvision import utils
 from model import Generator
 import numpy as np
 import os
+import lpips
+
+def normalize(x):
+    return x / torch.sqrt(x.pow(2).sum(-1, keepdim=True))
+
+def slerp(a, b, t):
+    a = normalize(a)
+    b = normalize(b)
+    d = (a * b).sum(-1, keepdim=True)
+    p = t * torch.acos(d)
+    c = normalize(b - d * a)
+    d = a * torch.cos(p) + c * torch.sin(p)
+    return normalize(d)
+
+def lerp(a, b, t):
+    return a + (b - a) * t
+
+
+loss_fn = lpips.PerceptualLoss(model="net-lin", net="vgg").cuda()
 
 torch.random.manual_seed(15927)
 
@@ -88,11 +107,31 @@ if __name__ == "__main__":
     ckpt = torch.load(args.ckpt)
     g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id).to(args.device)
 
-    g.load_state_dict(ckpt["g_ema"], strict=False)
+    g.load_state_dict(ckpt["g_ema"], strict=True)
 
     trunc = g.mean_latent(4096)
     print(eigvec_dict.keys())
+    #Evaluate PPL
+    #dist = []
+    #for i in range(100):
+    #    latent1 = torch.randn(100, 512, device=args.device)
+    #    latent2 = torch.randn(100, 512, device=args.device)
+    #    #Interpolation between two latents
+    #    t = torch.rand([latent1.shape[0]], device=latent1.device)
+    #    zt0 = slerp(latent1, latent2, t.unsqueeze(0))
+    #    zt1 = slerp(latent1, latent2, t.unsqueeze(0) + 1e-4)
+    #    img1, _ = g.forward_test([zt0],torch.zeros_like(latent1),0,truncation=args.truncation,truncation_latent=trunc,input_is_latent=True)
+    #    img2, _ = g.forward_test([zt1],torch.zeros_like(latent1),0,truncation=args.truncation,truncation_latent=trunc,input_is_latent=True)
+    #    with torch.no_grad():
+    #        d = loss_fn.forward(img1, img2) / (1e-4 ** 2)
+    #    dist.append(d)
+    #dist = torch.cat(dist).cpu().numpy()
+    #lo = np.percentile(dist, 1, interpolation='lower')
+    #hi = np.percentile(dist, 99, interpolation='higher')
+    #ppl = np.extract(np.logical_and(dist >= lo, dist <= hi), dist).mean()
+    #print(float(ppl))
 
+    #Evaluate FID and VP
     labels = []
     for i in range(10000):
 
@@ -110,9 +149,11 @@ if __name__ == "__main__":
         else:
             labels = np.concatenate([labels, delta_onehot], axis=0)
 
-        value_list = list(eigvec_dict.values())[key]
+        value_list = list(eigvec_dict.values())[key // 2 - 1]
+        #value_list = eigvec_dict[key]
 
         direction = 5 * value_list[:, j].unsqueeze(0).to(args.device)
+
         img1, _ = g.forward_test(
             [latent],
             direction,

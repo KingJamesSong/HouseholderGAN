@@ -988,7 +988,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--diag_size",
         type=int,
-        default=1,
+        default=10,
         help="size of idenity matrix to ",
     )
 

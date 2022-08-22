@@ -13,9 +13,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Apply closed form factorization")
     parser.add_argument(
-        "-i", "--index", type=int, default=0, help="index of eigenvector"
-    )
-    parser.add_argument(
         "-d",
         "--degree",
         type=float,
@@ -61,23 +58,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--is_ortho",
-        action="store_true",
-        help="name of the closed form factorization result factor file",
-    )
-
-    parser.add_argument(
         "--ortho_id",
         type=int,
-        default=1,
+        default=-2,
         help="name of the closed form factorization result factor file",
     )
 
     parser.add_argument(
         "--diag_size",
         type=int,
-        default=1,
-        help="size of idenity matrix to ",
+        default=10,
+        help="How many attributes to extract",
     )
 
 
@@ -92,7 +83,7 @@ if __name__ == "__main__":
     ckpt = torch.load(args.ckpt)
     g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id, diag_size=args.diag_size).to(args.device)
 
-    g.load_state_dict(ckpt["g_ema"], strict=False)
+    g.load_state_dict(ckpt["g_ema"], strict=True)
 
     trunc = g.mean_latent(4096)
 
@@ -110,7 +101,7 @@ if __name__ == "__main__":
 
         for j in range(args.diag_size):
             imglists = []
-            for i in np.linspace(-20, 20, 11):
+            for i in np.linspace(-20, 20, 7):
                 direction = i * eigvec_dict[key][:, j].unsqueeze(0).to(args.device)
                 img1, _ = g.forward_test(
                     [latent],

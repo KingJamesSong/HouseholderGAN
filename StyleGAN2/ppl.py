@@ -34,7 +34,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Perceptual Path Length calculator")
 
     parser.add_argument(
-        "--space", choices=["z", "w"], help="space that PPL calculated with"
+        "--space", default="w", choices=["z", "w"], help="space that PPL calculated with"
     )
     parser.add_argument(
         "--batch", type=int, default=64, help="batch size for the models"
@@ -55,6 +55,18 @@ if __name__ == "__main__":
         "--crop", action="store_true", help="apply center crop to the images"
     )
     parser.add_argument(
+        "--ortho_id",
+        type=int,
+        default=1,
+        help="name of the closed form factorization result factor file",
+    )
+    parser.add_argument(
+        "--channel_multiplier",
+        type=int,
+        default=2,
+        help='channel multiplier factor. config-f = 2, else = 1',
+    )
+    parser.add_argument(
         "--sampling",
         default="end",
         choices=["end", "full"],
@@ -70,8 +82,8 @@ if __name__ == "__main__":
 
     ckpt = torch.load(args.ckpt)
 
-    g = Generator(args.size, latent_dim, 8).to(device)
-    g.load_state_dict(ckpt["g_ema"])
+    g = Generator(args.size, 512, 8, channel_multiplier=args.channel_multiplier, ortho_id=args.ortho_id).to(device)
+    g.load_state_dict(ckpt["g_ema"],strict=True)
     g.eval()
 
     percept = lpips.PerceptualLoss(
