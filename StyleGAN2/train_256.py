@@ -1047,7 +1047,7 @@ if __name__ == "__main__":
             lr=args.lr * g_reg_ratio,
             betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
         )
-        print('training_parameters', len(generator.parameters()))
+        print('training all parameters')
     else:
         training_parameters = []
         for n, p in generator.named_parameters():
