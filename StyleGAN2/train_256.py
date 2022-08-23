@@ -1142,13 +1142,13 @@ if __name__ == "__main__":
     checkpoints_dir = args.checkpoints_dir
     sample_dir = args.sample_dir
 
-    if not os.path.exists(checkpoints_dir):
+    if get_rank() == 0 and not os.path.exists(checkpoints_dir):
         os.mkdir(checkpoints_dir)
 
     args.checkpoints_dir = checkpoints_dir
     args.sample_dir = sample_dir
 
-    if not os.path.exists(sample_dir):
+    if get_rank() == 0 and not os.path.exists(sample_dir):
         os.mkdir(sample_dir)
 
     train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device)
