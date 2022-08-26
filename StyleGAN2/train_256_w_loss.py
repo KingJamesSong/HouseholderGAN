@@ -165,7 +165,8 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     # functions_list = getmembers(lpips, isfunction)
     #
     # print(functions_list)
-    loss_fn_vgg = lpips.PerceptualLoss(net='vgg').to(device).eval()
+    #loss_fn_vgg = lpips.PerceptualLoss(net='vgg').to(device).eval()
+    loss_fn_vgg = torch.nn.MSELoss().to(device)
 
     for idx in pbar:
         i = idx + args.start_iter
@@ -245,28 +246,20 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         latent = generator.get_latent(noise[0])
 
         lid = np.random.randint(0, 6)
-        d_id = np.random.randint(0, 9)
-        d_id1 = d_id
-        d_id2 = d_id + 1
+        d_id1, d_id2 = np.random.randint(0, 10, (2,))
+        #d_id1 = d_id
+        #d_id2 = d_id + 1
 
         with torch.no_grad():
 
             U = generator.convs[lid * 2].conv.modulation.U
-            V = generator.convs[lid * 2].conv.modulation.V
-
-            d1 = U.shape[0]
-            d2 = V.shape[0]
-
-            S = torch.zeros(d1, d2).to(U)
-            S.requires_grad = False
-
-            for j in range(10):
-                S[j, j] = 1
+            V = generator.convs[lid * 2].conv.modulation.V.to(U)
+            S = generator.convs[lid * 2].conv.modulation.S.to(U)
 
             weight = Q(U).mm(S).mm(Q(V))
             eigvec = torch.svd(weight).V
 
-            alpha = 1.0
+            alpha = 20
             direction1 = alpha * eigvec[:, d_id1].unsqueeze(0)
             direction2 = - alpha * eigvec[:, d_id2].unsqueeze(0)
 
@@ -479,8 +472,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ortho_id",
         type=int,
-        default=1,
+        default=-2,
         help="name of the closed form factorization result factor file",
+    )
+    parser.add_argument(
+        "--diag_size",
+        type=int,
+        default=10,
+        help="size of idenity matrix to ",
     )
 
     parser.add_argument(
@@ -631,13 +630,13 @@ if __name__ == "__main__":
     checkpoints_dir = args.checkpoints_dir
     sample_dir = args.sample_dir
 
-    if not os.path.exists(checkpoints_dir):
+    if get_rank() == 0 and not os.path.exists(checkpoints_dir):
         os.mkdir(checkpoints_dir)
 
     args.checkpoints_dir = checkpoints_dir
     args.sample_dir = sample_dir
 
-    if not os.path.exists(sample_dir):
+    if get_rank() == 0 and not os.path.exists(sample_dir):
         os.mkdir(sample_dir)
 
     train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, device)
