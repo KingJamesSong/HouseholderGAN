@@ -166,7 +166,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
     #
     # print(functions_list)
     #loss_fn_vgg = lpips.PerceptualLoss(net='vgg').to(device).eval()
-    loss_fn_vgg = torch.nn.MSELoss().to(device)
+    #loss_fn_vgg = torch.nn.MSELoss().to(device)
 
     for idx in pbar:
         i = idx + args.start_iter
@@ -245,7 +245,7 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
         # latent = torch.randn(args.n_sample, 512, device=args.device)
         latent = generator.get_latent(noise[0])
 
-        lid = np.random.randint(0, 6)
+        lid = np.random.randint(2, 4)
         d_id1, d_id2 = np.random.randint(0, 10, (2,))
         #d_id1 = d_id
         #d_id2 = d_id + 1
@@ -261,12 +261,19 @@ def train(args, loader, generator, discriminator, g_optim, d_optim, g_ema, devic
 
             alpha = 20
             direction1 = alpha * eigvec[:, d_id1].unsqueeze(0)
-            direction2 = - alpha * eigvec[:, d_id2].unsqueeze(0)
+            direction2 = alpha * eigvec[:, d_id2].unsqueeze(0)
 
         img1, _ = generator.forward_test([latent], direction1, lid)
         img2, _ = generator.forward_test([latent], direction2, lid)
+        #img0, _ = generator.forward_test([latent], torch.zeros_like(direction2), lid)
 
-        g_loss_regu = - loss_fn_vgg(img1, img2).mean()
+        mask1 = ( img1-fake_img ).abs()
+        mask2 = ( img2-fake_img ).abs()
+
+        reg = (mask1*mask2).mean()
+        g_loss_regu = reg
+
+        #g_loss_regu = - loss_fn_vgg(img1, img2).mean()
 
         loss_dict["g"] = g_loss
         loss_dict["g_loss_regu"] = g_loss_regu
