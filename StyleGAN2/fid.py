@@ -52,6 +52,9 @@ def calc_fid(sample_mean, sample_cov, real_mean, real_cov, eps=1e-6):
 
     trace = np.trace(sample_cov) + np.trace(real_cov) - 2 * np.trace(cov_sqrt)
 
+    print("mean norm", mean_norm)
+    print("mean norm", trace)
+
     fid = mean_norm + trace
 
     return fid
@@ -91,19 +94,24 @@ if __name__ == "__main__":
     parser.add_argument(
         "ckpt", metavar="CHECKPOINT", help="path to generator checkpoint"
     )
-
+    parser.add_argument(
+        "--ortho_id",
+        type=int,
+        default=-2,
+        help="name of the closed form factorization result factor file",
+    )
     args = parser.parse_args()
 
     ckpt = torch.load(args.ckpt)
 
-    g = Generator(args.size, 512, 8).to(device)
-    g.load_state_dict(ckpt["g_ema"])
+    g = Generator(args.size, 512, 8, ortho_id=args.ortho_id).to(device)
+    g.load_state_dict(ckpt["g_ema"],strict=False)
     g = nn.DataParallel(g)
     g.eval()
 
     if args.truncation < 1:
         with torch.no_grad():
-            mean_latent = g.mean_latent(args.truncation_mean)
+            mean_latent = g.module.mean_latent(args.truncation_mean)
 
     else:
         mean_latent = None

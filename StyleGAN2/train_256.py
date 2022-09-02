@@ -938,6 +938,7 @@ if __name__ == "__main__":
         help="path to the checkpoints to resume training",
     )
     parser.add_argument("--lr", type=float, default=0.002, help="learning rate")
+    parser.add_argument("--lr_ortho", type=float, default=0.002, help="learning rate of Orthogonal layer")
     parser.add_argument(
         "--channel_multiplier",
         type=int,
@@ -1043,7 +1044,18 @@ if __name__ == "__main__":
     d_reg_ratio = args.d_reg_every / (args.d_reg_every + 1)
 
     if args.training_FULL:
-        g_optim = optim.Adam(generator.parameters(),
+        training_parameters = []
+        base_params=[]
+        #Select Modified Parameters
+        for n, p in generator.named_parameters():
+            if '.U' in n or '.V' in n:
+                p.requires_grad = True
+                training_parameters.append(p)
+            else:
+                p.requires_grad = True
+                base_params.append(p)
+
+        g_optim = optim.Adam([{'params': base_params},{'params': training_parameters, "lr": args.lr_ortho * g_reg_ratio}],
             lr=args.lr * g_reg_ratio,
             betas=(0 ** g_reg_ratio, 0.99 ** g_reg_ratio),
         )
