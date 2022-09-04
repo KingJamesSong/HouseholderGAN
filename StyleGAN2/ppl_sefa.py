@@ -4,7 +4,7 @@ import torch
 from torch.nn import functional as F
 import numpy as np
 from tqdm import tqdm
-
+import math
 import lpips
 from model import Generator
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--ortho_id",
         type=int,
-        default=1,
+        default=-2,
         help="name of the closed form factorization result factor file",
     )
     parser.add_argument(
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                 latent_t0, latent_t1 = latent[::2], latent[1::2]
                 latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
                 #Random Eigenvector Direction
-                key = np.random.randint(0, 6)
+                key = np.random.randint(0, int(math.log(args.size, 2))-2)
                 j = np.random.randint(0, 10)
                 value_list = list(eigvec_dict.values())[key]
                 latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None]) + args.eps * value_list[:, j].unsqueeze(0).to(latent_e0.device)
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
             if factor > 1:
                 image = F.interpolate(
-                    image, size=(256, 256), mode="bilinear", align_corners=False
+                    image, size=(args.size, args.size), mode="bilinear", align_corners=False
                 )
 
             dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2) / (
