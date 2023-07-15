@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from torch.autograd import Function
-from model_ortho import OrthogonalWightMLP, Q, H
+from model_ortho import OrthogonalWightMLP, Q, H, fasthpp
 
 from op import FusedLeakyReLU, fused_leaky_relu, upfirdn2d, conv2d_gradfix
 
@@ -165,13 +165,12 @@ class EqualLinear(nn.Module):
 
         if self.is_ortho:
             if self.in_dim < self.out_dim:
-                weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V))
+                weight = fasthpp(self.U).mm(self.S.to(input)).mm(fasthpp(self.V))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
             else:
-                weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V))
+                weight = fasthpp(self.V).mm(self.S.to(input)).mm(fasthpp(self.U))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
 
-            # if self.is_ortho:
-            #     print(weight.sum(), self.U.sum())
-            #     print(weight.mm(weight.T))
         else:
             weight = self.weight
 
@@ -203,15 +202,6 @@ class EqualLinear(nn.Module):
                 # for i in range(10):
                 #     self.S.data[i,i].copy_(mean_eig)
 
-    # def intialize(self, weight_matrix):
-    #     if self.is_ortho:
-    #         with torch.no_grad():
-    #             UX, _, VX = torch.svd(weight_matrix)
-    #             hu, tauu = torch.geqrf(UX)
-    #             hv, tauv = torch.geqrf(VX)
-    #             self.U.data.copy_(hu)
-    #             self.V.data.copy_(hv)
-    #             # self.V = torch.nn.Parameter(hv)
 
 class ModulatedConv2d(nn.Module):
     def __init__(
