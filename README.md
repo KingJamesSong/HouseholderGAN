@@ -23,12 +23,12 @@ We release the fine-tuned StyleGANs on different resolutions.
 
 | Datset       | Backbone | Resolution | Checkpoint |
 |--------------|:--------:|:--------------:|:----------:|
-| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
-| FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
-| LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
-| AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
-| MetFaces     | StyleGAN3 |  1024x1024 | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
-| SHHQ         | StyleGAN3 |  512x256   | [:link:](https://drive.google.com/drive/folders/1L5RAM3lCSViD2zEqLtC-GQKVw6mxtxJ_?usp=sharing) |
+| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
+| FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) |
+| LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) |
+| AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) |
+| MetFaces     | StyleGAN3 |  1024x1024 | [:link:]() |
+| SHHQ         | StyleGAN3 |  512x256   | [:link:]() |
 
 
 
