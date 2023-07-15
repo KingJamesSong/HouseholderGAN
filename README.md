@@ -45,16 +45,30 @@ python apply_factor.py --output_dir [save_results_path] \
 wait
 ```
 
-## Evaluate
+## Evaluate (FID, PPL, PIPL)
 
 ```
-python closed_form_factorization.py --out [factor_path] [save_model_path] --is_ortho &
+python fid.py [save_model_path] \
+        --ortho_id -2 \
+        --inception inception_ffhq.pkl \
+        --size 1024
 
 wait
 
-python apply_factor.py --output_dir [save_results_path] \
-  --ckpt [save_model_path] \
-   --factor [factor_path] --ortho_id -2 --size 1024 &
+python closed_form_factorization.py --out [factor_path] \
+    [save_model_path] --is_ortho --diag_size 10 \
+
+wait
+
+python ppl_sefa.py [save_model_path] \
+    --factor [factor_path] --ortho_id -2
+    --sampling full --eps 1.0 --size 1024 \
+
+wait
+
+python ppl.py [save_model_path] --ortho_id -2 --sampling full --size 1024 &
+
+wait
 
 wait
 ```
