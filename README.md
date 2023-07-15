@@ -70,12 +70,62 @@ python ppl.py [save_model_path] --ortho_id -2 --sampling full --size 1024 &
 
 ```
 
-## Usage of StyleGAN3
+## Usage of StyleGAN3 (AFHQ)
 
+## Training 
 
+```
+python train.py --outdir=[save_sample_path] --cfg=stylegan3-r \
+          --data=[dataset_path] \
+      	--cfg=stylegan3-r --gpus=3 --batch-gpu=2 --batch=6 --gamma=16.4 --mbstd-group 2 \
+      	--resume=[pretrained_model] \
+        --diag_size 10  --is_ortho True --snap 5
+```
 
-## Usage of StyleGANHuman
+## Test
 
+```
+python closed_form_factorization.py --out [factor_path] \
+        --resume_pkl [save_model_path] \
+        --is_ortho &
+
+wait
+
+python apply_factor.py --outdir=[save_results_path] --cfg=stylegan3-r  \
+      --data=[dataset_path] \
+     --gpus=1 --batch-gpu=1 --batch=1 --gamma=32 --mbstd-group 1 \
+    --resume=[save_model_path] \
+    --diag_size 10  --is_ortho True --factor [factor_path]
+
+wait
+```
+
+## Usage of StyleGANHuman (SHHQ)
+
+## Training 
+
+```
+python train.py --outdir=[save_results_path] --cfg=stylegan3-r --gpus=4 --batch=16 --gamma=12.4 --mbstd-group 4 \
+    --mirror=1 --aug=noaug --data=[dataset_path]  --square=False --snap=5 \
+    --resume=[pretrained_model] --diag_size 10  --is_ortho True
+```
+
+## Test
+
+```
+python closed_form_factorization.py --out [factor_path] \
+        --resume_pkl [save_model_path] \
+        --is_ortho &
+wait
+
+python apply_factor.py --outdir=[save_results_path] --cfg=stylegan3-r  \
+      --data=[dataset_path]  \
+     --gpus=1 --batch-gpu=1 --batch=1 --gamma=16.4 --mbstd-group 1 \
+    --resume=[save_model_path]  \
+    --diag_size 10  --is_ortho True --factor [factor_path]
+
+wait
+```
 
 ## Pre-trained Models
 
@@ -90,10 +140,6 @@ We release the fine-tuned StyleGANs on different resolutions.
 | AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) |
 | MetFaces     | StyleGAN3 |  1024x1024 | to be updated |
 | SHHQ         | StyleGAN3 |  512x256   | to be updated |
-
-## Environment
-
-Check [householdergan.yml](https://github.com/KingJamesSong/HouseholderGAN/blob/main/householdergan.yaml) for the required packages to install.
 
 ## Citation 
 If you think the codes are helpful to your research, please consider citing our paper:
