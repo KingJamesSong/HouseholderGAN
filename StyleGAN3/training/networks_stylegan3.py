@@ -18,7 +18,7 @@ from torch_utils import persistence
 from torch_utils.ops import conv2d_gradfix
 from torch_utils.ops import filtered_lrelu
 from torch_utils.ops import bias_act
-from training.model_ortho import Q
+from training.model_ortho import Q, fasthpp
 #----------------------------------------------------------------------------
 
 @misc.profiled_function
@@ -116,9 +116,11 @@ class FullyConnectedLayer(torch.nn.Module):
         if self.is_ortho:
 
             if self.in_features < self.out_features:
-                self.weight = Q(self.U).mm(self.S.to(x)).mm(Q(self.V))
+                self.weight = fasthpp(self.U).mm(self.S.to(x)).mm(fasthpp(self.V))
+                #self.weight = Q(self.U).mm(self.S.to(x)).mm(Q(self.V)) #unaccelerated version
             else:
-                self.weight = Q(self.U).mm(self.S.to(x)).mm(Q(self.V))
+                self.weight = fasthpp(self.V).mm(self.S.to(x)).mm(fasthpp(self.U))
+                #self.weight = Q(self.V).mm(self.S.to(x)).mm(Q(self.U)) #unaccelerated version
         else:
             self.weight = self.weight
 
