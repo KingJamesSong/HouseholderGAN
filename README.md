@@ -12,16 +12,18 @@ Some identified attributes in StyleGAN2/StyleGAN3.
 
 ## Environment
 
-
 ```python
 conda env create -f householdergan.yml
 conda activate householdergan
 ```
 
-## Preparing dataset
-All datasets can be downloaded from the official website.
+## Pre-process Datasets
+All datasets can be downloaded from the official website. For StyleGAN2 pre-processing, please check and run [prepare_data.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN2/prepare_data.py). For StyleGAN3 pre-processing, please check and run [datset_tool.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN3/dataset_tool.py).
+
 
 ## Usage of StyleGAN2 (FFHQ dataset)
+
+
 
 ## Training 
 
@@ -128,19 +130,20 @@ python apply_factor.py --outdir=[save_results_path] --cfg=stylegan3-r  \
 wait
 ```
 
-## Pre-trained Models
+## Fine-tuned and Pre-trained Models
 
 We release the fine-tuned StyleGANs on different resolutions.
 
 
-| Datset       | Backbone | Resolution | Checkpoint |
-|--------------|:--------:|:--------------:|:----------:|
-| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
-| FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) |
-| LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) |
-| AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) |
-| MetFaces     | StyleGAN3 |  1024x1024 | to be updated |
-| SHHQ         | StyleGAN3 |  512x256   | to be updated |
+| Datset       | Backbone | Resolution | Fine-tuned Checkpoint | Pre-trained Model |
+|--------------|:--------:|:--------------:|:----------:| :----------:|
+| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) | to be updated |
+| FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) | to be updated |
+| LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) | to be updated |
+| LSUN Cat     | StyleGAN2 |  256x256   | [:link:]() | to be updated |
+| AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) | to be updated |
+| MetFaces     | StyleGAN3 |  1024x1024 | to be updated | to be updated |
+| SHHQ         | StyleGAN3 |  512x256   | to be updated | to be updated |
 
 ## Citation 
 If you think the codes are helpful to your research, please consider citing our paper:
