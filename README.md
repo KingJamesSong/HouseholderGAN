@@ -21,13 +21,34 @@ All datasets can be downloaded from the official website.
 
 ## Usage of StyleGAN2
 
+## Training
 
+```
+python -m torch.distributed.launch \
+      --nproc_per_node=4 --master_port=9032 \
+      train_1024.py --batch 8 /nfs/data_todi/jzhang/dataset/ffhq1024 \
+      --ckpt [pretrained_model] --size 1024 --ortho_id -2 --iter 10000000 \
+      --checkpoints_dir [save_model_path] \
+      --sample_dir [save_sample_path] --loadd --training_FULL --diag_size 10 &
+```
+## Test
 
+```
+python closed_form_factorization.py --out [factor_path] [save_model_path] --is_ortho &
+
+wait
+
+python apply_factor.py --output_dir [save_results_path] \
+  --ckpt [save_model_path] \
+   --factor [factor_path] --ortho_id -2 --size 1024 &
+
+wait
+```
 
 ## Usage of StyleGAN3
 
 
-
+## Usage of StyleGANHUman
 
 
 ## Pre-trained Models
