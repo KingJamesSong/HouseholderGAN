@@ -26,7 +26,7 @@ All datasets can be downloaded from the official website. For StyleGAN2 pre-proc
 Training on FFHQ:
 
 ```python
-python -m torch.distributed.launch train.py \
+python -m torch.distributed.launch train_1024.py \
       --nproc_per_node=4 --master_port=9032 \
       train_1024.py --batch 8 [dataset_path] \
       --ckpt [pretrained_model] --size 1024 --ortho_id -2 --iter 10000000 \
