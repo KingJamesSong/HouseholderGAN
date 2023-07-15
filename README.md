@@ -10,8 +10,10 @@ This paper proposes Householder Projector, a flexible and general low-rank ortho
 Some identified attributes in StyleGAN2/StyleGAN3.
 </p>
 
-## Install
-```
+## Environment
+
+
+```python
 conda env create -f householdergan.yml
 conda activate householdergan
 ```
@@ -23,7 +25,7 @@ All datasets can be downloaded from the official website.
 
 ## Training 
 
-```
+```python
 python -m torch.distributed.launch \
       --nproc_per_node=4 --master_port=9032 \
       train_1024.py --batch 8 [dataset_path] \
@@ -33,7 +35,7 @@ python -m torch.distributed.launch \
 ```
 ## Test
 
-```
+```python
 python closed_form_factorization.py --out [factor_path] [save_model_path] --is_ortho &
 
 wait
@@ -47,7 +49,7 @@ wait
 
 ## Evaluate (FID, PPL, PIPL)
 
-```
+```python
 python fid.py [save_model_path] \
         --ortho_id -2 \
         --inception inception_ffhq.pkl \
@@ -71,10 +73,9 @@ python ppl.py [save_model_path] --ortho_id -2 --sampling full --size 1024 &
 ```
 
 ## Usage of StyleGAN3 (AFHQ)
+ 
 
-## Training 
-
-```
+```python
 python train.py --outdir=[save_sample_path] --cfg=stylegan3-r \
           --data=[dataset_path] \
       	--cfg=stylegan3-r --gpus=3 --batch-gpu=2 --batch=6 --gamma=16.4 --mbstd-group 2 \
@@ -84,7 +85,7 @@ python train.py --outdir=[save_sample_path] --cfg=stylegan3-r \
 
 ## Test
 
-```
+```python
 python closed_form_factorization.py --out [factor_path] \
         --resume_pkl [save_model_path] \
         --is_ortho &
@@ -104,7 +105,7 @@ wait
 
 ## Training 
 
-```
+```python
 python train.py --outdir=[save_results_path] --cfg=stylegan3-r --gpus=4 --batch=16 --gamma=12.4 --mbstd-group 4 \
     --mirror=1 --aug=noaug --data=[dataset_path]  --square=False --snap=5 \
     --resume=[pretrained_model] --diag_size 10  --is_ortho True
@@ -112,7 +113,7 @@ python train.py --outdir=[save_results_path] --cfg=stylegan3-r --gpus=4 --batch=
 
 ## Test
 
-```
+```python
 python closed_form_factorization.py --out [factor_path] \
         --resume_pkl [save_model_path] \
         --is_ortho &
