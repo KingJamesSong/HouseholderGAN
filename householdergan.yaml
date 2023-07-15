@@ -1,4 +1,4 @@
-name: eg3d
+name: householdergan
 channels:
   - pytorch
   - nvidia
@@ -155,4 +155,4 @@ dependencies:
     - wcwidth==0.2.5
     - werkzeug==2.1.2
     - zipp==3.8.0
-prefix: /data/jzhang/software/anaconda3/envs/eg3d
+prefix: /data/jzhang/software/anaconda3/envs/householdergan
