@@ -41,8 +41,8 @@ We release the fine-tuned StyleGANs on different resolutions.
 | FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) |
 | LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) |
 | AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) |
-| MetFaces     | StyleGAN3 |  1024x1024 | [:link:]() |
-| SHHQ         | StyleGAN3 |  512x256   | [:link:]() |
+| MetFaces     | StyleGAN3 |  1024x1024 | to be updated |
+| SHHQ         | StyleGAN3 |  512x256   | to be updated |
 
 ## Environment
 
