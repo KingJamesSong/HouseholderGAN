@@ -68,9 +68,6 @@ wait
 
 python ppl.py [save_model_path] --ortho_id -2 --sampling full --size 1024 &
 
-wait
-
-wait
 ```
 
 ## Usage of StyleGAN3
