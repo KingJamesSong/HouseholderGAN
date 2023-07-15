@@ -37,7 +37,7 @@ We release the fine-tuned StyleGANs on different resolutions.
 
 ## Environment
 
-Check [eg3d.yml](https://github.com/KingJamesSong/HouseholderGAN/blob/main/eg3d.yaml) for the required packages.
+Check [eg3d.yml](https://github.com/KingJamesSong/HouseholderGAN/blob/main/householdergan.yaml) for the required packages.
 
 ## Citation 
 If you think the codes are helpful to your research, please consider citing our paper:
