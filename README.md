@@ -131,10 +131,10 @@ wait
 
 ## Fine-tuned and Pre-trained Models
 
-We release the fine-tuned StyleGANs on different resolutions.
+We release the pre-trained StyleGANs and our fine-tuned models on different resolutions.
 
 
-| Datset       | Backbone | Resolution | Fine-tuned Checkpoint | Pre-trained Model |
+| Datset       | Backbone | Resolution | Fine-tuned Model | Pre-trained Model |
 |--------------|:--------:|:--------------:|:----------:| :----------:|
 | FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
 | FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1EqgBZKvqiC32yjGl-dSG8lqXcU927JmI/view?usp=sharing) |
