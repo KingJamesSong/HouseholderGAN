@@ -10,6 +10,15 @@ This paper proposes Householder Projector, a flexible and general low-rank ortho
 Some identified attributes in StyleGAN2/StyleGAN3.
 </p>
 
+## Install
+```
+conda env create -f householdergan.yml
+conda activate householdergan
+```
+
+## Preparing dataset
+All datasets can be downloaded from the official website.
+
 ## Usage of StyleGAN2
 
 
