@@ -47,7 +47,7 @@ python apply_factor.py --output_dir [save_results_path] \
 wait
 ```
 
-## Evaluate (FID, PPL, PIPL)
+Evaluation (FID, PPL, PIPL)
 
 ```python
 python fid.py [save_model_path] \
