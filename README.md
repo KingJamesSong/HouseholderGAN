@@ -103,7 +103,9 @@ wait
 ```
 
 ## Usage of StyleGANHuman
-
+```
+cd StyleGANHuman/training_scripts/sg3/
+```
 Training on SHHQv1:
 
 ```python
