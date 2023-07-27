@@ -2,13 +2,15 @@
 
 ICCV23 paper [Householder Projector for Unsupervised Latent Semantics Discovery](https://arxiv.org/pdf/2307.08012.pdf)
 
-This paper proposes Householder Projector, a flexible and general low-rank orthogonal matrix representation based on Householder transformations, to parameterize the projection matrix of StyleGANs. The orthogonality guarantees that the eigenvectors correspond to disentangled interpretable semantics, while the low-rank property encourages that each identified direction has meaningful variations. We integrate our projector into pre-trained StyleGAN2/StyleGAN3 and evaluate the models on several benchmarks. Within marginally 1\% of the original training steps for fine-tuning, our projector helps StyleGANs to discover more disentangled and precise semantic attributes without sacrificing image fidelity.
+Eye Size          |         Head         |  Expression
+:-------------------------:|:--------------------:|:-------------------------:
+![](./imgs/eye.gif) | ![](./imgs/head.gif) |  ![](./imgs/expression.gif)
 
-<p align="center">
-<img src="householder1_full.png" width="800px"/>
-  <br>
-Some identified attributes in StyleGAN2/StyleGAN3.
-</p>
+Color           |  Translation
+:-------------------------:|:-------------------------:
+![](./imgs/color.gif)  
+
+This paper proposes Householder Projector, a flexible and general low-rank orthogonal matrix representation based on Householder transformations, to parameterize the projection matrix of StyleGANs. The orthogonality guarantees that the eigenvectors correspond to disentangled interpretable semantics, while the low-rank property encourages that each identified direction has meaningful variations. We integrate our projector into pre-trained StyleGAN2/StyleGAN3 and evaluate the models on several benchmarks. Within marginally 1\% of the original training steps for fine-tuning, our projector helps StyleGANs to discover more disentangled and precise semantic attributes without sacrificing image fidelity.
 
 ## Environment
 

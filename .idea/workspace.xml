@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="70d2e011-aef9-4753-91a4-8c0bd6ed6252" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="JupyterTrust" id="4efddb1f-3e44-436d-90fb-9ac41a374ba3" />
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2B11dYAYEqFOkG01BAGP35OD5vS" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/code/HouseholderGAN/imgs&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\code\HouseholderGAN\imgs" />
+      <recent name="C:\code\HouseholderGAN\StyleGAN2" />
+      <recent name="C:\code\HouseholderGAN\StyleGANHuman" />
+      <recent name="C:\code\HouseholderGAN\StyleGAN3" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="70d2e011-aef9-4753-91a4-8c0bd6ed6252" name="Default Changelist" comment="" />
+      <created>1656058864401</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1656058864401</updated>
+      <workItem from="1656058867054" duration="533000" />
+      <workItem from="1656498016635" duration="3754000" />
+      <workItem from="1657712897257" duration="598000" />
+      <workItem from="1657851496757" duration="1611000" />
+      <workItem from="1660723740268" duration="2832000" />
+      <workItem from="1661180605223" duration="8857000" />
+      <workItem from="1662603023375" duration="1214000" />
+      <workItem from="1662906941788" duration="587000" />
+      <workItem from="1663205798787" duration="596000" />
+      <workItem from="1664899140308" duration="230000" />
+      <workItem from="1664982901534" duration="2063000" />
+      <workItem from="1665466616229" duration="1199000" />
+      <workItem from="1665564361421" duration="646000" />
+      <workItem from="1665589448708" duration="512000" />
+      <workItem from="1665757131686" duration="801000" />
+      <workItem from="1665820233827" duration="593000" />
+      <workItem from="1665909348283" duration="595000" />
+      <workItem from="1666191020393" duration="598000" />
+      <workItem from="1666280859643" duration="1196000" />
+      <workItem from="1689423374695" duration="6789000" />
+      <workItem from="1690036408932" duration="1539000" />
+      <workItem from="1690423801388" duration="2392000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="349" y="87" width="583" height="498" key="find.popup" timestamp="1662351444158">
+      <screen x="0" y="0" width="1280" height="672" />
+    </state>
+    <state x="349" y="87" width="583" height="498" key="find.popup/0.0.1280.672@0.0.1280.672" timestamp="1662351444158" />
+  </component>
+</project>
