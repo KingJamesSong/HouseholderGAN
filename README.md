@@ -143,8 +143,8 @@ We release the pre-trained StyleGANs and our fine-tuned models on different reso
 | LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1Be3fKnwHYnbHUBMTpWfjKzF5YD828IjB/view?usp=sharing) |
 | LSUN Cat     | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1bon039aXMfsY72ApRv_lJ3160HDsa353/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1icL6XqN7-oLpcYBzODQnF2Pd2KtkT-R1/view?usp=sharing) |
 | AFHQv2       | StyleGAN3 |  512x512   | [:link:](https://drive.google.com/file/d/1OZsu5RPeBbxk4mNfqEoq0e_Af5GZFpf9/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1HJUlp-Yfe7bGLV5XktIVLBZxmY1Q2ep8/view?usp=sharing) |
-| MetFaces     | StyleGAN3 |  1024x1024 | to be updated | [:link:](https://drive.google.com/file/d/1vPo-eojSbXt9FHsMCEv1jLc1pQhqmcdy/view?usp=sharing) |
-| SHHQ         | StyleGAN3 |  512x256   | to be updated | [:link:](https://drive.google.com/file/d/1tyi4hVjfJiGVrcukVRbdJaMkmR8yIvbK/view?usp=sharing) |
+| MetFaces     | StyleGAN3 |  1024x1024 | [:link:](https://drive.google.com/file/d/14_Qt4n5N1n45c0-BATXjZ-BpMEzWhbL1/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1vPo-eojSbXt9FHsMCEv1jLc1pQhqmcdy/view?usp=sharing) |
+| SHHQv1         | StyleGAN3 |  512x256   | [:link:](https://drive.google.com/file/d/1y40QPk_OAS-1pNcpajt-e_wuWlAJcMQo/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1tyi4hVjfJiGVrcukVRbdJaMkmR8yIvbK/view?usp=sharing) |
 
 ## Citation 
 If you think the codes are helpful to your research, please consider citing our paper:
