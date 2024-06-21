@@ -52,10 +52,10 @@ If you think the codes are helpful to your research, please consider citing our 
 
 ```
 @inproceedings{song2023householder,
-  title={Householder Projector for Unsupervised Latent Semantics Discovery},
+  title={Householder Projector for Unsupervised Latent Semantics Discovery of 2D/3D GANs},
   author={Song, Yue and Zhang, Jichao and Sebe, Nicu and Wang, Wei},
-  booktitle={ICCV},
-  year={2023}
+  booktitle={arxiv},
+  year={2024}
 }
 ```
 
