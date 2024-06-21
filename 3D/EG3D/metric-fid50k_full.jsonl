@@ -1,0 +1,4 @@
+{"results": {"fid50k_full": 11.754215423372706}, "metric": "fid50k_full", "total_time": 2592.9817605018616, "total_time_str": "43m 13s", "num_gpus": 3, "snapshot_pkl": "network-snapshot-000000.pkl", "timestamp": 1712190402.5420215}
+{"results": {"fid50k_full": 10.12474560070177}, "metric": "fid50k_full", "total_time": 2647.370598077774, "total_time_str": "44m 07s", "num_gpus": 3, "snapshot_pkl": "network-snapshot-000020.pkl", "timestamp": 1712215298.4075387}
+{"results": {"fid50k_full": 10.219497784719566}, "metric": "fid50k_full", "total_time": 2622.9057426452637, "total_time_str": "43m 43s", "num_gpus": 3, "snapshot_pkl": "network-snapshot-000040.pkl", "timestamp": 1712240268.348559}
+{"results": {"fid50k_full": 10.274859506368786}, "metric": "fid50k_full", "total_time": 2625.2002806663513, "total_time_str": "43m 45s", "num_gpus": 3, "snapshot_pkl": "network-snapshot-000060.pkl", "timestamp": 1712265234.3949487}

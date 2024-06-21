@@ -23,11 +23,101 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="70d2e011-aef9-4753-91a4-8c0bd6ed6252" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/imgs/color.png.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgs/pose.png.gif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/imgs/shape.png.gif" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/apply_factor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/apply_factor_PIPL.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/apply_factor_PPL.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/apply_factor_video.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/calc_metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/camera_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/closed_form_factorization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/dataset_tool.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/dnnlib/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/dnnlib/util.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/environment.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gen_samples.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gen_samples_factor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gen_videos.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/gl_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/glfw_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/imgui_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/imgui_window.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/gui_utils/text_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/legacy.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metric-fid50k_full.jsonl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/equivariance.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/frechet_inception_distance.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/inception_score.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/kernel_inception_distance.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/metric_main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/metric_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/perceptual_path_length.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/metrics/precision_recall.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/shape_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/custom_ops.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/misc.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/bias_act.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/bias_act.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/bias_act.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/bias_act.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/conv2d_gradfix.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/conv2d_resample.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu_ns.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu_rd.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/filtered_lrelu_wr.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/fma.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/grid_sample_gradfix.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/upfirdn2d.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/upfirdn2d.cu" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/upfirdn2d.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/ops/upfirdn2d.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/persistence.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/torch_utils/training_stats.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/train.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/augment.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/crosssection_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/dataset.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/dual_discriminator.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/loss.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/model_ortho.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/networks_stylegan2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/networks_stylegan3.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/shape_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/superresolution.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/training_loop.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/triplane.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/visualize.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/volumetric_rendering/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/volumetric_rendering/math_utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/volumetric_rendering/ray_marcher.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/volumetric_rendering/ray_sampler.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/training/volumetric_rendering/renderer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/visualizer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/backbone_cache_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/capture_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/conditioning_pose_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/latent_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/layer_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/performance_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/pickle_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/pose_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/render_depth_sample_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/render_type_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/renderer.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/stylemix_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/trunc_noise_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/EG3D/viz/zoom_widget.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/3D/imgs/3d.jpg" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,31 +131,45 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 5
+}]]></component>
   <component name="ProjectId" id="2B11dYAYEqFOkG01BAGP35OD5vS" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/code/HouseholderGAN/imgs&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "D:/code/HouseholderGAN/3D/imgs",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\code\HouseholderGAN\3D\imgs" />
+      <recent name="D:\code\HouseholderGAN\3D\EG3D" />
       <recent name="C:\code\HouseholderGAN\imgs" />
       <recent name="C:\code\HouseholderGAN\StyleGAN2" />
       <recent name="C:\code\HouseholderGAN\StyleGANHuman" />
-      <recent name="C:\code\HouseholderGAN\StyleGAN3" />
     </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-PY-241.14494.241" />
+        <option value="bundled-python-sdk-0509580d9d50-28c9f5db9ffe-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.14494.241" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
@@ -99,7 +203,18 @@
       <workItem from="1666280859643" duration="1196000" />
       <workItem from="1689423374695" duration="6789000" />
       <workItem from="1690036408932" duration="1539000" />
-      <workItem from="1690423801388" duration="4860000" />
+      <workItem from="1690423801388" duration="5591000" />
+      <workItem from="1690524850726" duration="834000" />
+      <workItem from="1690773957807" duration="1108000" />
+      <workItem from="1690895513361" duration="1174000" />
+      <workItem from="1693212734610" duration="96000" />
+      <workItem from="1701537316297" duration="669000" />
+      <workItem from="1701618799863" duration="3159000" />
+      <workItem from="1701877457562" duration="5541000" />
+      <workItem from="1702067818222" duration="763000" />
+      <workItem from="1702457166670" duration="1311000" />
+      <workItem from="1703241662966" duration="1190000" />
+      <workItem from="1718956385480" duration="1985000" />
     </task>
     <servers />
   </component>
@@ -116,11 +231,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="349" y="87" width="583" height="498" key="find.popup" timestamp="1662351444158">
-      <screen x="0" y="0" width="1280" height="672" />
-    </state>
-    <state x="349" y="87" width="583" height="498" key="find.popup/0.0.1280.672@0.0.1280.672" timestamp="1662351444158" />
   </component>
 </project>
