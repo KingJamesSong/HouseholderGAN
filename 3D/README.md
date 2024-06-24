@@ -44,7 +44,7 @@ We release the pre-trained EG3D and our fine-tuned models on different resolutio
 
 | Datset       | Backbone | Resolution | Fine-tuned Model | Pre-trained Model |
 |--------------|:--------:|:----------:|:----------:| :----------:|
-| FFHQ         |   EG3D   |  512x512   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
+| FFHQ         |   EG3D   |  512x512   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) | [:link:](https://drive.google.com/file/d/13KdtvpAy9FqFwLLqekcf1HuRU3d2H0n9/view?usp=sharing) |
 
 
 ## Citation 
