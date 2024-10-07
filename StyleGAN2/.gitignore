@@ -1,0 +1,17 @@
+
+e_file/*
+o_file/*
+out_file/*
+ckpt/*
+sample/*
+
+download_ffhq.py
+download_ffhq.sh
+
+prepare_data.sh
+
+../pretrained/*
+
+
+
+
