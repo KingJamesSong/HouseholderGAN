@@ -151,7 +151,7 @@ We release the pre-trained StyleGANs and our fine-tuned models on different reso
 
 | Datset       | Backbone | Resolution | Fine-tuned Model | Pre-trained Model |
 |--------------|:--------:|:--------------:|:----------:| :----------:|
-| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
+| FFHQ         | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1Be4JONvYTZSLJEsZQJhd67U9AErFzZpC/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1mbmGRkrdZfWwCaRRV9OF_xW2AH1Cj0-H/view?usp=sharing) |
 | FFHQ         | StyleGAN2 |  1024x1024 | [:link:](https://drive.google.com/file/d/1MEBk5Br2stbaSNl-4ImQQ1qUJnBBQPjM/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1EqgBZKvqiC32yjGl-dSG8lqXcU927JmI/view?usp=sharing) |
 | LSUN Church  | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/15Nzei6bMev3gJu3votONi9LqcqU1ihiN/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1Be3fKnwHYnbHUBMTpWfjKzF5YD828IjB/view?usp=sharing) |
 | LSUN Cat     | StyleGAN2 |  256x256   | [:link:](https://drive.google.com/file/d/1bon039aXMfsY72ApRv_lJ3160HDsa353/view?usp=sharing) | [:link:](https://drive.google.com/file/d/1icL6XqN7-oLpcYBzODQnF2Pd2KtkT-R1/view?usp=sharing) |
