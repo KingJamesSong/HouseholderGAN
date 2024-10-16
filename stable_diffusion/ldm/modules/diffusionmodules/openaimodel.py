@@ -140,20 +140,24 @@ class Downsample(nn.Module):
                  downsampling occurs in the inner-two dimensions.
     """
 
-    def __init__(self, channels, use_conv, dims=2, out_channels=None,padding=1):
+    def __init__(self, channels, use_conv, dims=2, out_channels=None,padding=1, is_ortho=False):
         super().__init__()
         self.channels = channels
         self.out_channels = out_channels or channels
         self.use_conv = use_conv
         self.dims = dims
+        self.is_ortho = is_ortho
         stride = 2 if dims != 3 else (1, 2, 2)
-        if use_conv:
-            self.op = conv_nd(
-                dims, self.channels, self.out_channels, 3, stride=stride, padding=padding
-            )
+        if is_ortho:
+            pass
         else:
-            assert self.channels == self.out_channels
-            self.op = avg_pool_nd(dims, kernel_size=stride, stride=stride)
+            if use_conv:
+                self.op = conv_nd(
+                    dims, self.channels, self.out_channels, 3, stride=stride, padding=padding # TODO: modify the conv_nd to accept is_ortho
+                )
+            else:
+                assert self.channels == self.out_channels
+                self.op = avg_pool_nd(dims, kernel_size=stride, stride=stride) # TODO: modify the avg_pool_nd to accept is_ortho
 
     def forward(self, x):
         assert x.shape[1] == self.channels
@@ -188,6 +192,7 @@ class ResBlock(TimestepBlock):
         use_checkpoint=False,
         up=False,
         down=False,
+        is_ortho=False,
     ):
         super().__init__()
         self.channels = channels
@@ -197,6 +202,7 @@ class ResBlock(TimestepBlock):
         self.use_conv = use_conv
         self.use_checkpoint = use_checkpoint
         self.use_scale_shift_norm = use_scale_shift_norm
+        self.is_ortho = is_ortho
 
         self.in_layers = nn.Sequential(
             normalization(channels),
@@ -561,7 +567,7 @@ class UNetModel(nn.Module):
                 self.input_blocks.append(TimestepEmbedSequential(*layers))
                 self._feature_size += ch
                 input_block_chans.append(ch)
-            if level != len(channel_mult) - 1:
+            if level != len(channel_mult) - 2:
                 out_ch = ch
                 self.input_blocks.append(
                     TimestepEmbedSequential(
@@ -586,7 +592,32 @@ class UNetModel(nn.Module):
                 ds *= 2
                 self._feature_size += ch
         
-        # latent space
+        # before latent space, do orthogonal projection
+        out_ch = ch
+        self.input_blocks.append(
+            TimestepEmbedSequential(
+                ResBlock(
+                    ch,
+                    time_embed_dim,
+                    dropout,
+                    out_channels=out_ch,
+                    dims=dims,
+                    use_checkpoint=use_checkpoint,
+                    use_scale_shift_norm=use_scale_shift_norm,
+                    down=True,
+                    is_ortho=True, # TODO: modify the resblock to accept is_ortho
+                )
+                if resblock_updown
+                else Downsample(
+                    ch, conv_resample, dims=dims, out_channels=out_ch, is_ortho=True, # TODO: modify the downsample block to accept is_ortho
+                )
+            )
+        )
+        ch = out_ch
+        input_block_chans.append(ch)
+        ds *= 2
+        self._feature_size += ch
+
 
         if num_head_channels == -1:
             dim_head = ch // num_heads
@@ -733,6 +764,9 @@ class UNetModel(nn.Module):
         for module in self.input_blocks:
             h = module(h, emb, context)
             hs.append(h)
+        
+        # latent space
+
         h = self.middle_block(h, emb, context)
         for module in self.output_blocks:
             h = th.cat([h, hs.pop()], dim=1)

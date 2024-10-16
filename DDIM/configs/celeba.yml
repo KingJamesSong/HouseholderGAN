@@ -22,6 +22,9 @@ model:
     ema_rate: 0.9999
     ema: True
     resamp_with_conv: True
+    style_dim: 512
+    is_ortho: True
+    diag_size: 10
 
 diffusion:
     beta_schedule: linear

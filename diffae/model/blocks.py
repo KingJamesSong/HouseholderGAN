@@ -7,7 +7,8 @@ import torch as th
 import torch.nn.functional as F
 from choices import *
 from config_base import BaseConfig
-from torch import nn
+import pdb
+import numpy as np
 
 from .nn import (avg_pool_nd, conv_nd, linear, normalization,
                  timestep_embedding, torch_checkpoint, zero_module)
@@ -41,6 +42,109 @@ class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
                 x = layer(x)
         return x
 
+class projection_layer(nn.Module):
+    def __init__(self,
+                 in_dim: int = None,
+                 out_dim: int = None,
+                 is_ortho: bool = False,
+                 bias=True, 
+                 bias_init=0, 
+                 lr_mul=1, 
+                 activation=None,
+                 diag_size=10):
+        super().__init__()
+        self.is_ortho = is_ortho
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+    
+        if is_ortho:
+
+            self.S = th.zeros(out_dim, in_dim)
+            self.S.requires_grad = False
+            for i in range(diag_size):
+                self.S[i, i] = 1
+            self.U = th.nn.Parameter(th.zeros((out_dim, out_dim)).normal_(0, 0.05))
+            self.V = th.nn.Parameter(th.zeros((in_dim, in_dim)).normal_(0, 0.05))
+            self.scale = 1
+        else:
+            self.weight = nn.Parameter(th.randn(out_dim, in_dim).div_(lr_mul))
+            self.scale = (1 / math.sqrt(in_dim)) * lr_mul
+
+        if bias:
+            self.bias = nn.Parameter(th.zeros(out_dim).fill_(bias_init))
+
+        else:
+            self.bias = None
+
+        self.activation = activation
+
+        self.lr_mul = lr_mul
+    
+    def forward(self, input):
+
+        if self.is_ortho:
+            if self.in_dim > self.out_dim:
+                weight = self.fasthpp(self.U).mm(self.S.to(input)).mm(self.fasthpp(self.V))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
+            else:
+                weight = self.fasthpp(self.V).mm(self.S.to(input)).mm(self.fasthpp(self.U))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
+
+        else:
+            weight = self.weight
+
+        input = input.permute(0, 2, 3, 1)
+        out = F.linear(
+            input, weight * self.scale, bias=self.bias * self.lr_mul
+        )
+        
+        out = out.permute(0, 3, 1, 2)
+
+        return out
+    
+    def intialize(self, weight_matrix):
+        if self.is_ortho:
+            with th.no_grad():
+                UX, SS, VX = th.svd(weight_matrix, some=False)
+                hu, tauu = th.geqrf(UX)
+                hv, tauv = th.geqrf(VX)
+                self.U.data.copy_(hu)
+                self.V.data.copy_(hv)
+    
+    def fasthpp(self, V, stop_recursion=1):
+        d = V.shape[0]
+        norms = th.norm(V.T, 2, dim=1)
+        V = V / norms.view(1, d)
+        Y_ = V.clone().T
+        W_ = -2 * Y_.clone()
+
+        # Only works for powers of two.
+        assert (d & (d - 1)) == 0 and d != 0, "d should be power of two.  "
+
+        # Step 1: compute (Y, W) s by merging!
+        k = 1
+        for i, c in enumerate(range(int(np.log2(d)))):
+
+            k_2 = k
+            k *= 2
+
+            m1_ = Y_.view(d // k_2, k_2, d)[0::2] @ th.transpose(W_.view(d // k_2, k_2, d)[1::2], 1, 2)
+            m2_ = th.transpose(W_.view(d // k_2, k_2, d)[0::2], 1, 2) @ m1_
+
+            W_ = W_.view(d // k_2, k_2, d)
+            W_[1::2] += th.transpose(m2_, 1, 2)
+            W_ = W_.view(d, d)
+
+            if stop_recursion is not None and c == stop_recursion: break
+        X = th.eye(d, d, device=V.device)
+        # Step 2:
+        if stop_recursion is None:
+            return X + W_.T @ (Y_ @ X)
+        else:
+            # For each (W,Y) pair multiply with
+            for i in range(d // k - 1, -1, -1):
+                X = X + W_[i * k: (i + 1) * k].T @ (Y_[i * k: (i + 1) * k] @ X)
+            return X
 
 @dataclass
 class ResBlockConfig(BaseConfig):
@@ -68,6 +172,8 @@ class ResBlockConfig(BaseConfig):
     # whether to init the convolution with zero weights
     # this is default from BeatGANs and seems to help learning
     use_zero_module: bool = True
+    is_ortho: bool = False
+    diag_size: int = 10
 
     def __post_init__(self):
         self.out_channels = self.out_channels or self.channels
@@ -105,7 +211,17 @@ class ResBlock(TimestepBlock):
             nn.SiLU(),
             conv_nd(conf.dims, conf.channels, conf.out_channels, 3, padding=1)
         ]
-        self.in_layers = nn.Sequential(*layers)
+
+        projection_layers = [
+            normalization(conf.channels),
+            nn.SiLU(),
+            projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=conf.diag_size)
+        ]
+
+        if conf.is_ortho:
+            self.in_layers = nn.Sequential(*projection_layers)
+        else:
+            self.in_layers = nn.Sequential(*layers)
 
         self.updown = conf.up or conf.down
 
@@ -161,6 +277,8 @@ class ResBlock(TimestepBlock):
                 conv,
             ]
             self.out_layers = nn.Sequential(*layers)
+        
+        # self.projector = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=conf.diag_size)
 
         #############################
         # SKIP LAYERS
@@ -190,6 +308,8 @@ class ResBlock(TimestepBlock):
             x: input
             lateral: lateral connection from the encoder
         """
+        if x is None:
+            print("x is None")
         return torch_checkpoint(self._forward, (x, emb, cond, lateral),
                                 self.conf.use_checkpoint)
 
@@ -217,7 +337,7 @@ class ResBlock(TimestepBlock):
             x = self.x_upd(x)
             h = in_conv(h)
         else:
-            h = self.in_layers(x)
+            h = self.in_layers(x)  # [16, 128, 128, 128]
 
         if self.conf.use_condition:
             # it's possible that the network may not receieve the time emb
@@ -253,8 +373,12 @@ class ResBlock(TimestepBlock):
                 in_channels=self.conf.out_channels,
                 up_down_layer=None,
             )
-
-        return self.skip_connection(x) + h
+        try:
+            return self.skip_connection(x) + h
+        except:
+            print("h dim after projection", h.shape)
+            print("res dim", self.skip_connection(x).shape)
+            
 
 
 def apply_conditions(

@@ -218,6 +218,9 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
             assert k == len(self.input_blocks)
 
             # middle blocks
+            if h is None:
+                print('h is None after input blocks')
+            # print("h before middle block", h.shape)
             h = self.middle_block(h, emb=mid_time_emb, cond=mid_cond_emb)
         else:
             # no lateral connections

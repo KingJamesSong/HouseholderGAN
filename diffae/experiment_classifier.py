@@ -98,7 +98,7 @@ class ClsModel(pl.LightningModule):
                 strict = False
         else:
             if strict is None:
-                strict = True
+                strict = False
         return super().load_state_dict(state_dict, strict=strict)
 
     def normalize(self, cond):

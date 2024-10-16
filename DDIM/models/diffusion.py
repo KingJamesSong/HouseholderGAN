@@ -1,6 +1,9 @@
 import math
 import torch
 import torch.nn as nn
+from torch.nn import functional as F
+from .model_ortho import OrthogonalWightMLP, Q, H, fasthpp
+from op import FusedLeakyReLU, fused_leaky_relu, upfirdn2d, conv2d_gradfix
 
 
 def get_timestep_embedding(timesteps, embedding_dim):
@@ -32,6 +35,80 @@ def nonlinearity(x):
 def Normalize(in_channels):
     return torch.nn.GroupNorm(num_groups=32, num_channels=in_channels, eps=1e-6, affine=True)
 
+
+class EqualLinear(nn.Module):
+    def __init__(
+        self, in_dim, out_dim, bias=True, bias_init=0, lr_mul=1, activation=None, is_ortho=False, diag_size=10,
+    ):
+        super().__init__()
+
+        self.is_ortho = is_ortho
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+
+        if is_ortho:
+
+            self.S = torch.zeros(out_dim, in_dim)
+            self.S.requires_grad = False
+            for i in range(diag_size):
+                self.S[i, i] = 1
+            self.U = torch.nn.Parameter(torch.zeros((out_dim, out_dim)).normal_(0, 0.05))
+            self.V = torch.nn.Parameter(torch.zeros((in_dim, in_dim)).normal_(0, 0.05))
+            self.scale = 1
+
+        else:
+            self.weight = nn.Parameter(torch.randn(out_dim, in_dim).div_(lr_mul))
+            self.scale = (1 / math.sqrt(in_dim)) * lr_mul
+
+        if bias:
+            self.bias = nn.Parameter(torch.zeros(out_dim).fill_(bias_init))
+
+        else:
+            self.bias = None
+
+        self.activation = activation
+
+        self.lr_mul = lr_mul
+
+    def forward(self, input):
+
+        if self.is_ortho:
+            if self.in_dim < self.out_dim:
+                weight = fasthpp(self.U).mm(self.S.to(input)).mm(fasthpp(self.V))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
+            else:
+                weight = fasthpp(self.V).mm(self.S.to(input)).mm(fasthpp(self.U))
+                #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
+
+        else:
+            weight = self.weight
+
+        if self.activation:
+
+            out = F.linear(input, weight * self.scale)
+            out = fused_leaky_relu(out, self.bias * self.lr_mul)
+        else:
+            out = F.linear(
+                input, weight * self.scale, bias=self.bias * self.lr_mul
+            )
+
+        return out
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}({self.weight.shape[1]}, {self.weight.shape[0]})"
+        )
+
+    def intialize(self, weight_matrix):
+        if self.is_ortho:
+            with torch.no_grad():
+                UX, SS, VX = torch.svd(weight_matrix, some=False)
+                hu, tauu = torch.geqrf(UX)
+                hv, tauv = torch.geqrf(VX)
+                self.U.data.copy_(hu)
+                self.V.data.copy_(hv)
+                # for i in range(10):
+                #     self.S.data[i,i].copy_(mean_eig)
 
 class Upsample(nn.Module):
     def __init__(self, in_channels, with_conv):
@@ -201,6 +278,11 @@ class Model(nn.Module):
         resolution = config.data.image_size
         resamp_with_conv = config.model.resamp_with_conv
         num_timesteps = config.diffusion.num_diffusion_timesteps
+        in_channel = config.model.in_channels
+        style_dim = config.model.style_dim
+        is_ortho = config.model.is_ortho
+        diag_size = config.model.diag_size
+        
         
         if config.model.type == 'bayesian':
             self.logvar = nn.Parameter(torch.zeros(num_timesteps))
@@ -252,6 +334,10 @@ class Model(nn.Module):
                 down.downsample = Downsample(block_in, resamp_with_conv)
                 curr_res = curr_res // 2
             self.down.append(down)
+        
+        # modulation
+        self.modulation = EqualLinear(style_dim, in_channel, bias_init=1, is_ortho=is_ortho, diag_size=diag_size)
+
 
         # middle
         self.mid = nn.Module()
@@ -264,6 +350,8 @@ class Model(nn.Module):
                                        out_channels=block_in,
                                        temb_channels=self.temb_ch,
                                        dropout=dropout)
+        
+
 
         # upsampling
         self.up = nn.ModuleList()
@@ -317,6 +405,10 @@ class Model(nn.Module):
                 hs.append(h)
             if i_level != self.num_resolutions-1:
                 hs.append(self.down[i_level].downsample(hs[-1]))
+        
+        h = hs.pop()
+        h = self.modulation(h)
+        hs.append(h)
 
         # middle
         h = hs[-1]
