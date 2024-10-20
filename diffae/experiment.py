@@ -72,8 +72,6 @@ class LitModel(pl.LightningModule):
             print('step:', state['global_step'])
             self.load_state_dict(state['state_dict'], strict=False)
 
-            
-
         if conf.latent_infer_path is not None:
             print('loading latent stats ...')
             state = torch.load(conf.latent_infer_path)
@@ -410,8 +408,9 @@ class LitModel(pl.LightningModule):
         return {'loss': loss}
 
     def on_train_batch_end(self, outputs, batch, batch_idx: int,
-                           dataloader_idx: int) -> None:
+                           ) -> None:
         """
+        dataloader_idx removed
         after each training step ...
         """
         if self.is_last_accum(batch_idx):
@@ -433,7 +432,8 @@ class LitModel(pl.LightningModule):
             self.evaluate_scores()
 
     def on_before_optimizer_step(self, optimizer: Optimizer,
-                                 optimizer_idx: int) -> None:
+                                 ) -> None:
+        # optimizer_idx
         # fix the fp16 + clip grad norm problem with pytorch lightinng
         # this is the currently correct way to do it
         if self.conf.grad_clip > 0:
@@ -893,8 +893,22 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
     checkpoint_path = f'{conf.logdir}/last.ckpt'
     print('ckpt path:', checkpoint_path)
     if os.path.exists(checkpoint_path):
-        resume = checkpoint_path
-        print('resume!')
+        # resume = checkpoint_path
+        state = torch.load(checkpoint_path, map_location='cpu')
+        model_state_dict = state['state_dict']
+        for name0, layer0 in model.model.middle_block.named_modules():
+            resnet_in_middleblock = layer0[0]
+            for name1, layer1 in resnet_in_middleblock.in_layers.named_modules():
+                projection_layer_in_middleblock = layer1[2]
+                weight = model_state_dict['model.middle_block.0.in_layers.2.weight']
+                print(weight.shape)
+                projection_layer_in_middleblock.intialize(weight)
+                break
+            break
+        # new_checkpoint_path = f'{conf.logdir}/last_initialited.ckpt'
+        # torch.save(model_state_dict, new_checkpoint_path)
+        # resume = new_checkpoint_path
+        model.load_state_dict(model_state_dict, strict=False)
     else:
         if conf.continue_from is not None:
             # continue from a checkpoint
@@ -908,20 +922,21 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     # from pytorch_lightning.
 
-    plugins = []
+    # plugins = []
     if len(gpus) == 1 and nodes == 1:
         accelerator = None
     else:
-        accelerator = 'ddp'
-        from pytorch_lightning.plugins import DDPPlugin
+        accelerator = 'auto'
+        # from pytorch_lightning.plugins import DDPPlugin
+        from pytorch_lightning.strategies import DDPStrategy
 
         # important for working with gradient checkpoint
-        plugins.append(DDPPlugin(find_unused_parameters=False))
+        # plugins.append(DDPPlugin(find_unused_parameters=False))
 
     trainer = pl.Trainer(
         max_steps=conf.total_samples // conf.batch_size_effective,
-        resume_from_checkpoint=resume,
-        gpus=gpus,
+        # resume_from_checkpoint=resume,
+        # gpus=gpus,
         num_nodes=nodes,
         accelerator=accelerator,
         precision=16 if conf.fp16 else 32,
@@ -931,10 +946,11 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
         ],
         # clip in the model instead
         # gradient_clip_val=conf.grad_clip,
-        replace_sampler_ddp=True,
+        # replace_sampler_ddp=True,
         logger=tb_logger,
         accumulate_grad_batches=conf.accum_batches,
-        plugins=plugins,
+        # plugins=plugins,
+        strategy="ddp",
     )
 
     if mode == 'train':
@@ -950,7 +966,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
         print('loading from:', eval_path)
         state = torch.load(eval_path, map_location='cpu')
         print('step:', state['global_step'])
-        model.load_state_dict(state['state_dict'])
+        model.load_state_dict(state['state_dict'], strict=False)
         # trainer.fit(model)
         out = trainer.test(model, dataloaders=dummy)
         # first (and only) loader

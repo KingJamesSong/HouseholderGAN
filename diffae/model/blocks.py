@@ -103,9 +103,16 @@ class projection_layer(nn.Module):
         return out
     
     def intialize(self, weight_matrix):
+        print("weight_matrix shape", weight_matrix.shape)
+        if len(weight_matrix.shape) == 4:
+            pooled_matrix = F.adaptive_avg_pool2d(weight_matrix, (1, 1))
+            weight_matrix = pooled_matrix.squeeze()
         if self.is_ortho:
             with th.no_grad():
                 UX, SS, VX = th.svd(weight_matrix, some=False)
+                # print("UX shape", UX.shape)
+                # print("VX shape", VX.shape)
+                # pdb.set_trace()
                 hu, tauu = th.geqrf(UX)
                 hv, tauv = th.geqrf(VX)
                 self.U.data.copy_(hu)
@@ -355,6 +362,7 @@ class ResBlock(TimestepBlock):
                 if cond is None:
                     cond_out = None
                 else:
+                    # cond shape: [4, 512, 1, 1]
                     cond_out = self.cond_emb_layers(cond).type(h.dtype)
 
                 if cond_out is not None:

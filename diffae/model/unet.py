@@ -370,6 +370,8 @@ class BeatGANsEncoderConfig(BaseConfig):
     resblock_updown: bool = False
     use_new_attention_order: bool = False
     pool: str = 'adaptivenonzero'
+    is_ortho: bool = False
+    diag_size: int = 10
 
     def make_model(self):
         return BeatGANsEncoderModel(self)
@@ -484,13 +486,21 @@ class BeatGANsEncoderModel(nn.Module):
         )
         self._feature_size += ch
         if conf.pool == "adaptivenonzero":
-            self.out = nn.Sequential(
-                normalization(ch),
-                nn.SiLU(),
-                nn.AdaptiveAvgPool2d((1, 1)),
-                conv_nd(conf.dims, ch, conf.out_channels, 1),
-                nn.Flatten(),
-            )
+            if conf.is_ortho:
+                self.out = nn.Sequential(
+                    normalization(ch),
+                    nn.SiLU(),
+                    nn.AdaptiveAvgPool2d((1, 1)),
+                    projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=conf.diag_size),
+                )
+            else:
+                self.out = nn.Sequential(
+                    normalization(ch),
+                    nn.SiLU(),
+                    nn.AdaptiveAvgPool2d((1, 1)),
+                    conv_nd(conf.dims, ch, conf.out_channels, 1),
+                    nn.Flatten(),
+                )
         else:
             raise NotImplementedError(f"Unexpected {conf.pool} pooling")
 

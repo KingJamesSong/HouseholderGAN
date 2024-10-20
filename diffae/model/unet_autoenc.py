@@ -19,6 +19,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_channel_mult: Tuple[int] = None
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
+    is_ortho: bool = False
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -55,6 +56,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
             resblock_updown=conf.resblock_updown,
             use_new_attention_order=conf.use_new_attention_order,
             pool=conf.enc_pool,
+            is_ortho=conf.is_ortho,
         ).make_model()
 
         if conf.latent_net_conf is not None:
