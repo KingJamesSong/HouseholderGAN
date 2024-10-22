@@ -1,0 +1,16 @@
+conf: 1022_ffhq128_autoenc_130M
+Model params: 122.59 M
+loading pretrain ... ffhq128_autoenc_130M
+step: 1093750
+ckpt path: checkpoints/ffhq128_autoenc_130M/epoch=1909-step=1093749.ckpt
+loading from: checkpoints/ffhq128_autoenc_130M/epoch=1909-step=1093749.ckpt
+step: 1093750
+local seed: 0
+train data: 70000
+val data: 70000
+Testing: |          | 0/? [00:00<?, ?it/s]Testing:   0%|          | 0/1 [00:00<?, ?it/s]Testing DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s]local seed: 0
+train data: 70000
+val data: 70000
+global step: 0
+evaluating FID T = 10... latent T = 10
+on train dataloader start ...

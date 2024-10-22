@@ -1,0 +1,42 @@
+conf: ffhq128_autoenc_130M_projector_middle_block0
+Model params: 120.84 M
+loading pretrain ... ffhq128_autoenc_130M
+step: 1093750
+ckpt path: checkpoints/ffhq128_autoenc_130M_projector_middle_block0/checkpoints/epoch=51-step=113724.ckpt
+loading from: checkpoints/ffhq128_autoenc_130M_projector_middle_block0/checkpoints/epoch=51-step=113724.ckpt
+step: 113724
+local seed: 0
+train data: 70000
+val data: 70000
+Testing: |          | 0/? [00:00<?, ?it/s]Testing:   0%|          | 0/1 [00:00<?, ?it/s]Testing DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s]local seed: 0
+train data: 70000
+val data: 70000
+global step: 0
+evaluating FID T = 10... latent T = 10
+on train dataloader start ...
+conf: ffhq128_autoenc_130M_projector_middle_block0
+Model params: 120.84 M
+loading pretrain ... ffhq128_autoenc_130M
+step: 1093750
+ckpt path: checkpoints/ffhq128_autoenc_130M_projector_middle_block0/checkpoints/epoch=51-step=113724.ckpt
+loading from: checkpoints/ffhq128_autoenc_130M_projector_middle_block0/checkpoints/epoch=51-step=113724.ckpt
+step: 113724
+local seed: 1
+train data: 70000
+val data: 70000
+local seed: 1
+train data: 70000
+val data: 70000
+global step: 0
+evaluating FID T = 10... latent T = 10
+on train dataloader start ...
+fid (0): 13.849947929382324
+Testing DataLoader 0: 100%|██████████| 1/1 [54:47<00:00,  0.00it/s]Testing DataLoader 0: 100%|██████████| 1/1 [54:47<00:00,  0.00it/s]fid (1): 13.849947929382324
+{'fid_ema_T10_Tlatent10': 13.849947929382324}
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+       Test metric             DataLoader 0
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  fid_ema_T10_Tlatent10     13.849947929382324
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+{'fid_ema_T10_Tlatent10': 13.849947929382324}

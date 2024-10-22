@@ -33,7 +33,7 @@ def autoenc_base():
     base configuration for all Diff-AE models.
     """
     conf = TrainConfig()
-    conf.batch_size = 2
+    conf.batch_size = 8
     conf.beatgans_gen_type = GenerativeType.ddim
     conf.beta_scheduler = 'linear'
     conf.data_name = 'ffhq'
@@ -196,7 +196,7 @@ def ffhq128_autoenc_130M():
     conf.total_samples = 130_000_000
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
-    conf.name = 'ffhq128_autoenc_130M'
+    conf.name = '1022_ffhq128_autoenc_130M'
     return conf
 
 

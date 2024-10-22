@@ -187,7 +187,7 @@ class BeatGANsUNetModel(nn.Module):
                 conf.dropout,
                 dims=conf.dims,
                 use_checkpoint=conf.use_checkpoint,
-                is_ortho=True,
+                is_ortho=False,
                 **kwargs,
             ).make_model(),
             AttentionBlock(

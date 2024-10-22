@@ -140,7 +140,7 @@ class TrainConfig(BaseConfig):
     # number of resblocks for the UNET
     net_num_input_res_blocks: int = None
     net_enc_num_cls: int = None
-    num_workers: int = 0
+    num_workers: int = 8
     parallel: bool = False
     postfix: str = ''
     sample_size: int = 64
@@ -162,7 +162,7 @@ class TrainConfig(BaseConfig):
     data_cache_dir: str = os.path.expanduser('~/cache')
     work_cache_dir: str = os.path.expanduser('~/mycache')
     # to be overridden
-    name: str = ''
+    name: str = '1022_ffhq128_autoenc_130M'
 
     def __post_init__(self):
         self.batch_size_eval = self.batch_size_eval or self.batch_size

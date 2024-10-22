@@ -1,0 +1,11 @@
+conf: ffhq128_autoenc_130M
+Model params: 122.59 M
+loading pretrain ... ffhq128_autoenc_130M
+step: 1019986
+ckpt path: checkpoints/ffhq128_autoenc_130M/last.ckpt
+resume!
+local seed: 0
+train data: 70000
+val data: 70000
+on train dataloader start ...
+Training: -1it [00:00, ?it/s]Training:   0%|          | 0/8750 [00:00<00:00, 45590.26it/s]Epoch 1875:   0%|          | 0/8750 [00:00<00:01, 8490.49it/s]Epoch 1875:   0%|          | 0/8750 [00:00<57:18,  2.54it/s]  
