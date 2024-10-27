@@ -13,3 +13,7 @@ datasets/celeba
 checkpoints
 
 .ipynb_checkpoints/
+
+e_file/*
+o_file/*
+out_file/*

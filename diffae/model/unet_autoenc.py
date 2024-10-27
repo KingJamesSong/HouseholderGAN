@@ -151,7 +151,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
                 assert len(x) == len(x_start), f'{len(x)} != {len(x_start)}'
 
             tmp = self.encode(x_start)
-            cond = tmp['cond']
+            cond = tmp['cond']  # z_sem
 
         if t is not None:
             _t_emb = timestep_embedding(t, self.conf.model_channels)
@@ -276,7 +276,7 @@ class TimeStyleSeperateEmbed(nn.Module):
             nn.SiLU(),
             linear(time_out_channels, time_out_channels),
         )
-        self.style = nn.Identity()
+        self.style = nn.Identity() # mlp
 
     def forward(self, time_emb=None, cond=None, **kwargs):
         if time_emb is None:
