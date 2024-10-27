@@ -276,7 +276,8 @@ class TimeStyleSeperateEmbed(nn.Module):
             nn.SiLU(),
             linear(time_out_channels, time_out_channels),
         )
-        self.style = nn.Identity() # mlp
+        # self.style = nn.Identity() # mlp
+        self.style = nn.Linear(512, 512)
 
     def forward(self, time_emb=None, cond=None, **kwargs):
         if time_emb is None:
@@ -284,5 +285,9 @@ class TimeStyleSeperateEmbed(nn.Module):
             time_emb = None
         else:
             time_emb = self.time_embed(time_emb)
+        # cond shape: (4, 512)
+        # print('cond shape:', cond.shape)
         style = self.style(cond)
+        # print("cond shape after style:", style.shape)  
+        # pdb.set_trace()
         return EmbedReturn(emb=style, time_emb=time_emb, style=style)

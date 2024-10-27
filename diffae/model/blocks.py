@@ -364,7 +364,7 @@ class ResBlock(TimestepBlock):
                 else:
                     # cond shape: [4, 512, 1, 1]
                     try:
-                        cond = cond['cond']
+                        # cond = cond['cond']
                         cond_out = self.cond_emb_layers(cond).type(h.dtype)
                     except:
                         print("cond:", cond)
