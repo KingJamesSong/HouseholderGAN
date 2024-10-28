@@ -885,25 +885,23 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     if not os.path.exists(conf.logdir):
         os.makedirs(conf.logdir)
-    checkpoint_path = 'checkpoints/ffhq128_autoenc_130M/epoch=1909-step=1093749.ckpt'
+    checkpoint_path = 'checkpoints/ffhq128_autoenc_130M/last.ckpt'
     print('ckpt path:', checkpoint_path)
     if mode == 'train':
         if os.path.exists(checkpoint_path):
-            # resume = checkpoint_path
+            
             state = torch.load(checkpoint_path, map_location='cpu')
             model_state_dict = state['state_dict']
-            for name0, layer0 in model.model.middle_block.named_modules():
-                resnet_in_middleblock = layer0[0]
-                for name1, layer1 in resnet_in_middleblock.in_layers.named_modules():
-                    projection_layer_in_middleblock = layer1[2]
-                    weight = model_state_dict['model.middle_block.0.in_layers.2.weight']
-                    print(weight.shape)
-                    projection_layer_in_middleblock.intialize(weight)
-                    break
-                break
-            # new_checkpoint_path = f'{conf.logdir}/last_initialited.ckpt'
-            # torch.save(model_state_dict, new_checkpoint_path)
-            # resume = new_checkpoint_path
+            # for name0, layer0 in model.model.middle_block.named_modules():
+            #     resnet_in_middleblock = layer0[0]
+            #     for name1, layer1 in resnet_in_middleblock.in_layers.named_modules():
+            #         projection_layer_in_middleblock = layer1[2]
+            #         weight = model_state_dict['model.middle_block.0.in_layers.2.weight']
+            #         print(weight.shape)
+            #         projection_layer_in_middleblock.intialize(weight)
+            #         break
+            #     break
+            
             model.load_state_dict(model_state_dict, strict=False)
         else:
             if conf.continue_from is not None:
