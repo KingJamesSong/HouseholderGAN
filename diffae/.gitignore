@@ -17,3 +17,6 @@ checkpoints
 e_file/*
 o_file/*
 out_file/*
+
+factors/*
+apply_factor_outputs/*

@@ -914,18 +914,11 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
                                              name=None,
                                              version='')
 
-    # from pytorch_lightning.
 
-    # plugins = []
     if len(gpus) == 1 and nodes == 1:
         accelerator = None
     else:
         accelerator = 'auto'
-        # from pytorch_lightning.plugins import DDPPlugin
-        from pytorch_lightning.strategies import DDPStrategy
-
-        # important for working with gradient checkpoint
-        # plugins.append(DDPPlugin(find_unused_parameters=False))
 
     trainer = pl.Trainer(
         max_steps=conf.total_samples // conf.batch_size_effective,
