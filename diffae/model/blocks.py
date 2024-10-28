@@ -83,7 +83,7 @@ class projection_layer(nn.Module):
     def forward(self, input):
 
         if self.is_ortho:
-            if self.in_dim > self.out_dim:
+            if self.in_dim < self.out_dim:
                 weight = self.fasthpp(self.U).mm(self.S.to(input)).mm(self.fasthpp(self.V))
                 #weight = Q(self.U).mm(self.S.to(input)).mm(Q(self.V)) #unaccelerated computation
             else:
@@ -93,12 +93,16 @@ class projection_layer(nn.Module):
         else:
             weight = self.weight
 
-        input = input.permute(0, 2, 3, 1)
-        out = F.linear(
-            input, weight * self.scale, bias=self.bias * self.lr_mul
-        )
-        
-        out = out.permute(0, 3, 1, 2)
+        if len(input.shape) == 4:
+            input = input.permute(0, 2, 3, 1)
+            out = F.linear(
+                input, weight * self.scale, bias=self.bias * self.lr_mul
+            )
+            out = out.permute(0, 3, 1, 2)
+        else:
+            out = F.linear(
+                input, weight * self.scale, bias=self.bias * self.lr_mul
+            )
 
         return out
     

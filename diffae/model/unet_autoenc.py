@@ -7,6 +7,7 @@ from torch.nn.functional import silu
 from .latentnet import *
 from .unet import *
 from choices import *
+from .blocks import projection_layer
 
 
 @dataclass
@@ -19,7 +20,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_channel_mult: Tuple[int] = None
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
-    is_ortho: bool = False
+    is_ortho: bool = True
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -34,6 +35,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         self.time_embed = TimeStyleSeperateEmbed(
             time_channels=conf.model_channels,
             time_out_channels=conf.embed_channels,
+            is_ortho=conf.is_ortho,
         )
 
         self.encoder = BeatGANsEncoderConfig(
@@ -56,7 +58,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
             resblock_updown=conf.resblock_updown,
             use_new_attention_order=conf.use_new_attention_order,
             pool=conf.enc_pool,
-            is_ortho=conf.is_ortho,
+            # is_ortho=conf.is_ortho,
         ).make_model()
 
         if conf.latent_net_conf is not None:
@@ -269,7 +271,7 @@ class EmbedReturn(NamedTuple):
 
 class TimeStyleSeperateEmbed(nn.Module):
     # embed only style
-    def __init__(self, time_channels, time_out_channels):
+    def __init__(self, time_channels, time_out_channels, is_ortho=False):
         super().__init__()
         self.time_embed = nn.Sequential(
             linear(time_channels, time_out_channels),
@@ -277,7 +279,10 @@ class TimeStyleSeperateEmbed(nn.Module):
             linear(time_out_channels, time_out_channels),
         )
         # self.style = nn.Identity() # mlp
-        self.style = nn.Linear(512, 512)
+        if is_ortho:
+            self.style = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=is_ortho, diag_size=10)
+        else:
+            self.style = nn.Linear(512, 512)
 
     def forward(self, time_emb=None, cond=None, **kwargs):
         if time_emb is None:
