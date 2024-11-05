@@ -290,9 +290,9 @@ class TimeStyleSeperateEmbed(nn.Module):
             time_emb = None
         else:
             time_emb = self.time_embed(time_emb)
-        # cond shape: (4, 512)
-        # print('cond shape:', cond.shape)
-        style = self.style(cond)
-        # print("cond shape after style:", style.shape)  
-        # pdb.set_trace()
+        
+        try:
+            style = self.style(cond)
+        except:
+            style = self.style(cond['cond'])
         return EmbedReturn(emb=style, time_emb=time_emb, style=style)

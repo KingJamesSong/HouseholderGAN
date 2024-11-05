@@ -92,7 +92,7 @@ class LitModel(pl.LightningModule):
             self.device)
         return cond
 
-    def sample(self, N, device, T=None, T_latent=None):
+    def sample(self, N, device, direction=None, T=None, T_latent=None):
         if T is None:
             sampler = self.eval_sampler
             latent_sampler = self.latent_sampler
@@ -134,7 +134,7 @@ class LitModel(pl.LightningModule):
                                           self.ema_model,
                                           noise,
                                           sampler=sampler,
-                                          latent_sampler=None)
+                                          latent_sampler=sampler)
         pred_img = (pred_img + 1) / 2
         return pred_img
 

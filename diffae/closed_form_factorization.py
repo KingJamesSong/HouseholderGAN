@@ -2,6 +2,7 @@ import argparse
 
 import torch
 import os
+import pdb
 
 
 def H(v):
@@ -48,13 +49,15 @@ if __name__ == "__main__":
 
     if args.is_ortho:
         ckpt = torch.load(args.ckpt)
+        # ckpt keys: ['epoch', 'global_step', 'pytorch-lightning_version', 'state_dict', 'loops', 'callbacks', 'optimizer_states', 'lr_schedulers', 'MixedPrecision', 'hparams_name', 'hyper_parameters']
+
         #weight_mat =  []
         U = None
         V = None
 
         eigvec_ = {}
 
-        for k, v in ckpt.items():
+        for k, v in ckpt['state_dict'].items():
             if '.U' in k:
                 U = v
 
@@ -88,7 +91,7 @@ if __name__ == "__main__":
         ckpt = torch.load(args.ckpt)
         modulate = {
             k: v
-            for k, v in ckpt["g_ema"].items()
+            for k, v in ckpt['state_dict'].items()
             if "modulation" in k and "to_rgbs" not in k and "weight" in k
         }
 

@@ -33,7 +33,6 @@ def render_uncondition(conf: TrainConfig,
 
         if conf.latent_znormalize:
             cond = cond * conds_std.to(device) + conds_mean.to(device)
-
         # the diffusion on the model
         return sampler.sample(model=model, noise=x_T, cond=cond)
     else:
