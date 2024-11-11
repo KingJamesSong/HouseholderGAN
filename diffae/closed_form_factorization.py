@@ -92,8 +92,14 @@ if __name__ == "__main__":
         modulate = {
             k: v
             for k, v in ckpt['state_dict'].items()
-            if "modulation" in k and "to_rgbs" not in k and "weight" in k
+            if "time_embed" in k and "style" in k and "weight" in k and "ema_model" in k
         }
+
+        # weight shape: [512, 512]
+
+        # for k, v in modulate.items():
+        #     print(f"Key: {k}, Shape: {v.shape}")
+        # pdb.set_trace()
 
         weight_mat = []
         eigvec_ = {}
@@ -103,16 +109,3 @@ if __name__ == "__main__":
             eigvec_[k] = eigvec
 
         torch.save(eigvec_, args.out)
-    #     W = weight_mat[4]
-    #     eigvec = torch.svd(W).V.to("cpu")
-    #
-    # print('eigvec', eigvec.shape)
-
-    # print(args.out)
-    # if not os.path.exists(args.out):
-    # os.mkdir(args.out)
-
-    # print('1')
-    # torch.save({"ckpt": args.ckpt, "eigvec": eigvec}, args.out)
-    # print('2')
-

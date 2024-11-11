@@ -145,7 +145,7 @@ if __name__ == "__main__":
     with torch.no_grad():  # Disable gradient computation
         img = model.render(xT, cond=cond, T=100)
     grid0 = utils.save_image(img,
-        os.path.join(args.output_dir, f"{args.out_prefix}_original_1105.png"),
+        os.path.join(args.output_dir, f"{args.out_prefix}_original_1111.png"),
         normalize=True,
         range=(0, 1),
         nrow=args.n_sample,
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         for j in range(args.diag_size):
             imglists = []
             cond = cond_orig.clone()
-            for i in np.linspace(0, 10, 7):
+            for i in np.linspace(-5, 5, 7):
                 direction = eigvec_dict[key][:, j].unsqueeze(0).to(device='cuda:0') # (1, 512)
                 direction = direction / direction.norm()
                 
