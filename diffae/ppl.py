@@ -42,7 +42,7 @@ if __name__ == "__main__":
         "--space", default="w", choices=["z", "w"], help="space that PPL calculated with"
     )
     parser.add_argument(
-        "--batch", type=int, default=64, help="batch size for the models"
+        "--batch", type=int, default=16, help="batch size for the models"
     )
     parser.add_argument(
         "--n_sample",
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--ckpt", type=str, required=True, help="diffae checkpoints")
 
+    data_path = 'datasets/ffhq256.lmdb'
+
     args = parser.parse_args()
 
     latent_dim = 512
@@ -87,9 +89,11 @@ if __name__ == "__main__":
 
 
 
-    percept = lpips.PerceptualLoss(
-        model="net-lin", net="vgg", use_gpu=device.startswith("cuda")
-    )
+    # percept = lpips.PerceptualLoss(
+    #     model="net-lin", net="vgg", use_gpu=device.startswith("cuda")
+    # )
+
+    percept = lpips.LPIPS(net='vgg').to(device)
 
     distances = []
 
@@ -97,8 +101,17 @@ if __name__ == "__main__":
     resid = args.n_sample - (n_batch * args.batch)
     batch_sizes = [args.batch] * n_batch + [resid]
 
+    data = FFHQlmdb(path=data_path,
+                    image_size=args.size,
+                    split='test')
+    dataloader = torch.utils.data.DataLoader(data, 
+                                            batch_size=args.batch, 
+                                            num_workers=4, 
+                                            drop_last=True,
+                                            shuffle=True)
+
     with torch.no_grad():
-        for batch in tqdm(batch_sizes):
+        for batch_size in tqdm(batch_sizes):
             # noise = g.make_noise()
 
             # inputs = torch.randn([batch * 2, latent_dim], device=device)
@@ -116,13 +129,14 @@ if __name__ == "__main__":
 
             # image, _ = g([latent_e], input_is_latent=True, noise=noise)
 
-            data = ImageDataset('imgs_align', image_size=conf.img_size, exts=['jpg', 'JPG', 'png'], do_augment=False)
-            batch = data[0]['img'][None].to(device='cuda:0')
+            
+            
+            batch = next(iter(dataloader))
 
             model.ema_model.eval()
             model.ema_model.to(device='cuda:0')
-            cond = model.encode(batch)
-            xT = model.encode_stochastic(batch.to(device='cuda:0'), cond=cond, T=100)
+            cond = model.encode(batch['img'].to(device))
+            xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=cond, T=100)
             image = model.render(xT, cond=cond, T=100)
 
 
@@ -144,8 +158,12 @@ if __name__ == "__main__":
 
     distances = np.concatenate(distances, 0)
 
-    lo = np.percentile(distances, 1, interpolation="lower")
-    hi = np.percentile(distances, 99, interpolation="higher")
+    if len(distances) == 0:
+        print("Warning: distances array is empty")
+        lo = 0  
+    else:
+        lo = np.percentile(distances, 1, interpolation="lower")
+        hi = np.percentile(distances, 99, interpolation="higher")
     filtered_dist = np.extract(
         np.logical_and(lo <= distances, distances <= hi), distances
     )
