@@ -109,28 +109,22 @@ if __name__ == "__main__":
                                             num_workers=4, 
                                             drop_last=True,
                                             shuffle=True)
+    
+
+    # test LPIPS distance between simple images
+    # test_image1 = torch.ones((1, 3, 256, 256)).to(device) * 0.5  
+    # test_image2 = torch.ones((1, 3, 256, 256)).to(device) * 0.6  
+    # test_image1 = test_image1 * 2 - 1  
+    # test_image2 = test_image2 * 2 - 1  
+
+   
+    # test_dist = percept(test_image1, test_image2)
+    # print("Test LPIPS distance between simple images:", test_dist)  # 0.0086
+
 
     with torch.no_grad():
         for batch_size in tqdm(batch_sizes):
-            # noise = g.make_noise()
 
-            # inputs = torch.randn([batch * 2, latent_dim], device=device)
-            # if args.sampling == "full":
-            #     lerp_t = torch.rand(batch, device=device)
-            # else:
-            #     lerp_t = torch.zeros(batch, device=device)
-
-            # if args.space == "w":
-            #     latent = g.get_latent(inputs)
-            #     latent_t0, latent_t1 = latent[::2], latent[1::2]
-            #     latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
-            #     latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None] + args.eps)
-            #     latent_e = torch.stack([latent_e0, latent_e1], 1).view(*latent.shape)
-
-            # image, _ = g([latent_e], input_is_latent=True, noise=noise)
-
-            
-            
             batch = next(iter(dataloader))
 
             model.ema_model.eval()
@@ -139,22 +133,33 @@ if __name__ == "__main__":
             xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=cond, T=100)
             image = model.render(xT, cond=cond, T=100)
 
+            # normalize image
+            image = image * 2 - 1
 
-            if args.crop:
-                c = image.shape[2] // 8
-                image = image[:, :, c * 3 : c * 7, c * 2 : c * 6]
+            # print("Image range:", image.min().item(), image.max().item())
+
+            raw_dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2)
+            # print("Raw LPIPS distances:", raw_dist)
+
+            eps = 1e-2  
+            scaled_dist = raw_dist / (eps ** 2)
+            # print("Scaled distances:", scaled_dist)
+
+            # if args.crop:
+            #     c = image.shape[2] // 8
+            #     image = image[:, :, c * 3 : c * 7, c * 2 : c * 6]
 
             factor = image.shape[2] // 256
-
+        
             if factor > 1:
                 image = F.interpolate(
                     image, size=(256, 256), mode="bilinear", align_corners=False
                 )
 
-            dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2) / (
-                args.eps ** 2
-            )
-            distances.append(dist.to("cpu").numpy())
+            # dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2) / (
+            #     args.eps ** 2
+            # )
+            distances.append(scaled_dist.to("cpu").numpy())
 
     distances = np.concatenate(distances, 0)
 
