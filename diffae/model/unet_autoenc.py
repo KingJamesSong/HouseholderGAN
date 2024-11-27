@@ -20,7 +20,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_channel_mult: Tuple[int] = None
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
-    is_ortho: bool = True
+    is_ortho: bool = False
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
