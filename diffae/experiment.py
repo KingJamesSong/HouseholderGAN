@@ -915,10 +915,10 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
                                              version='')
 
 
-    if len(gpus) == 1 and nodes == 1:
-        accelerator = None
-    else:
-        accelerator = 'auto'
+    # if len(gpus) == 1 and nodes == 1:
+    #     accelerator = None
+    # else:
+    accelerator = 'auto'
 
     trainer = pl.Trainer(
         max_steps=conf.total_samples // conf.batch_size_effective,

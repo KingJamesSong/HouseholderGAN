@@ -39,10 +39,10 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
     """Estimates the second directional derivative of G w.r.t. its input at z in the direction x"""
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     # G_from_x , _  = G( z_ele - x for z_ele in z )
-    G_to_x = G.forward(x=( z_ele + x for z_ele in z.detach() ),
+    G_to_x = G.forward(x=( z_ele + x for z_ele in z),
                           t=t,
                           x_start=x_start)
-    G_from_x = G.forward(x=( z_ele - x for z_ele in z.detach() ),
+    G_from_x = G.forward(x=( z_ele - x for z_ele in z),
                             t=t,
                             x_start=x_start)
 
@@ -56,7 +56,7 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
 
 def multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon):
     """Estimates the first directional derivative of G w.r.t. its input at z in the direction x"""
-    G_to_x = G.forward(x=( z_ele + x for z_ele in z.detach() ),
+    G_to_x = G.forward(x=( z_ele + x for z_ele in z),
                         t=t,
                         x_start=x_start)
     
@@ -84,7 +84,8 @@ def multi_stack_var_and_reduce(sdds, reduction=th.max, return_separately=False):
 
 def hessian_penalty(G, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
     rademacher_size = th.Size((k, *z[0].size()))  # (k, N, z.size())
-    xs = epsilon * rademacher(rademacher_size, device=G.device)
+    # xs = epsilon * rademacher(rademacher_size, device=G.device)
+    xs = epsilon * rademacher(rademacher_size)
     second_orders = []
     for x in xs:  # Iterate over each (N, z.size()) tensor in xs
         central_second_order = multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
@@ -95,7 +96,8 @@ def hessian_penalty(G, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
 
 def ortho_jacob(G, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
     rademacher_size = th.Size((k, *z[0].size()))  # (k, N, z.size())
-    xs = epsilon * rademacher(rademacher_size, device=G.device)
+    # xs = epsilon * rademacher(rademacher_size, device=G.device)
+    xs = epsilon * rademacher(rademacher_size)
     first_orders = []
     for x in xs:  # Iterate over each (N, z.size()) tensor in xs
         first_order = multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
@@ -115,7 +117,7 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     rescale_timesteps: bool
     fp16: bool
     train_pred_xstart_detach: bool = True
-    use_hessian_penalty: bool = False
+    use_hessian_penalty: bool = True
     use_ortho_jacob: bool = False
 
     def make_sampler(self):
@@ -265,7 +267,7 @@ class GaussianDiffusionBeatGans:
             hessian_penalty_loss = hessian_penalty(G=model,
                                                    t=self._scale_timesteps(t), 
                                                    x_start=x_start.detach(),
-                                                   z=cond, 
+                                                   z=x_t.detach(), 
                                                    G_z=model_output,  
                                                    k=2, 
                                                    epsilon=1, 
@@ -275,7 +277,7 @@ class GaussianDiffusionBeatGans:
             ortho_jacob_loss = ortho_jacob(G=model,
                                            t=self._scale_timesteps(t), 
                                            x_start=x_start.detach(),
-                                           z=cond, 
+                                           z=x_t.detach(), 
                                            G_z=model_output, 
                                            k=2, 
                                            epsilon=1,
