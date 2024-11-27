@@ -86,13 +86,6 @@ if __name__ == "__main__":
     model_state_dict = state['state_dict']
     model.load_state_dict(model_state_dict, strict=True)
 
-
-
-
-    # percept = lpips.PerceptualLoss(
-    #     model="net-lin", net="vgg", use_gpu=device.startswith("cuda")
-    # )
-
     percept = lpips.LPIPS(net='vgg').to(device)
 
     distances = []
@@ -109,17 +102,6 @@ if __name__ == "__main__":
                                             num_workers=4, 
                                             drop_last=True,
                                             shuffle=True)
-    
-
-    # test LPIPS distance between simple images
-    # test_image1 = torch.ones((1, 3, 256, 256)).to(device) * 0.5  
-    # test_image2 = torch.ones((1, 3, 256, 256)).to(device) * 0.6  
-    # test_image1 = test_image1 * 2 - 1  
-    # test_image2 = test_image2 * 2 - 1  
-
-   
-    # test_dist = percept(test_image1, test_image2)
-    # print("Test LPIPS distance between simple images:", test_dist)  # 0.0086
 
 
     with torch.no_grad():
@@ -135,19 +117,10 @@ if __name__ == "__main__":
 
             # normalize image
             image = image * 2 - 1
-
-            # print("Image range:", image.min().item(), image.max().item())
-
             raw_dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2)
-            # print("Raw LPIPS distances:", raw_dist)
 
             eps = 1e-2  
             scaled_dist = raw_dist / (eps ** 2)
-            # print("Scaled distances:", scaled_dist)
-
-            # if args.crop:
-            #     c = image.shape[2] // 8
-            #     image = image[:, :, c * 3 : c * 7, c * 2 : c * 6]
 
             factor = image.shape[2] // 256
         
@@ -156,9 +129,6 @@ if __name__ == "__main__":
                     image, size=(256, 256), mode="bilinear", align_corners=False
                 )
 
-            # dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2) / (
-            #     args.eps ** 2
-            # )
             distances.append(scaled_dist.to("cpu").numpy())
 
     distances = np.concatenate(distances, 0)
