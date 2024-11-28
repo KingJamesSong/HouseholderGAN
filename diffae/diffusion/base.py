@@ -39,12 +39,13 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
     """Estimates the second directional derivative of G w.r.t. its input at z in the direction x"""
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     # G_from_x , _  = G( z_ele - x for z_ele in z )
-    G_to_x = G.forward(x=( z_ele + x for z_ele in z),
-                          t=t,
-                          x_start=x_start)
-    G_from_x = G.forward(x=( z_ele - x for z_ele in z),
-                            t=t,
-                            x_start=x_start)
+    x = x.unsqueeze(0).to(z.device)
+    G_to_x = G.forward(x=z+x,
+                       t=t,
+                       x_start=x_start)
+    G_from_x = G.forward(x=z-x,
+                         t=t,
+                         x_start=x_start)
 
     G_to_x = listify(G_to_x.pred)
     G_from_x = listify(G_from_x.pred)
@@ -56,9 +57,10 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
 
 def multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon):
     """Estimates the first directional derivative of G w.r.t. its input at z in the direction x"""
-    G_to_x = G.forward(x=( z_ele + x for z_ele in z),
-                        t=t,
-                        x_start=x_start)
+    x = x.unsqueeze(0).to(z.device)
+    G_to_x = G.forward(x=x+z,
+                       t=t,
+                       x_start=x_start)
     
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     G_to_x = listify(G_to_x.pred)
@@ -262,7 +264,7 @@ class GaussianDiffusionBeatGans:
         else:
             raise NotImplementedError(self.loss_type)
 
-        cond = model_forward.cond
+        cond = model_forward.cond  # shape (4, 512)
         if self.conf.use_hessian_penalty:
             hessian_penalty_loss = hessian_penalty(G=model,
                                                    t=self._scale_timesteps(t), 
