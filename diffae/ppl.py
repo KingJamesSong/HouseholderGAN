@@ -112,15 +112,26 @@ if __name__ == "__main__":
             model.ema_model.eval()
             model.ema_model.to(device='cuda:0')
             cond = model.encode(batch['img'].to(device))
-            xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=cond, T=100)
-            image = model.render(xT, cond=cond, T=100)
+
+            if args.sampling == "full":
+                lerp_t = torch.rand(cond.shape[0]//2, device=device)
+            else:
+                lerp_t = torch.zeros(cond.shape[0]//2, device=device)
+
+            latent_t0, latent_t1 = cond[::2], cond[1::2]
+            latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
+            latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None] + args.eps)
+            latent_e = torch.stack([latent_e0, latent_e1], 1).view(cond.shape)
+            
+            xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=latent_e, T=100)
+            image = model.render(xT, cond=latent_e, T=100)
 
             # normalize image
             image = image * 2 - 1
             raw_dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2)
 
-            eps = 1e-2  
-            scaled_dist = raw_dist / (eps ** 2)
+            # eps = 1e-2  
+            scaled_dist = raw_dist / (args.eps ** 2)
 
             factor = image.shape[2] // 256
         
@@ -128,6 +139,8 @@ if __name__ == "__main__":
                 image = F.interpolate(
                     image, size=(256, 256), mode="bilinear", align_corners=False
                 )
+
+            # print("scaled_dist:", scaled_dist)
 
             distances.append(scaled_dist.to("cpu").numpy())
 
@@ -143,4 +156,4 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("ppl:", filtered_dist.mean())
+    print("ppl projector eps 1e-2:", filtered_dist.mean())

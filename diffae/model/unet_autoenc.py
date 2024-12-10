@@ -20,7 +20,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_channel_mult: Tuple[int] = None
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
-    is_ortho: bool = False
+    is_ortho: bool = True
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -245,6 +245,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
                     lateral = None
                     # print(i, j, lateral)
 
+                # different dec_cond_emb, 3 different places to supply cond
                 h = self.output_blocks[k](h,
                                           emb=dec_time_emb,
                                           cond=dec_cond_emb,
