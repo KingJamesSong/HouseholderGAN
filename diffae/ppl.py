@@ -96,7 +96,8 @@ if __name__ == "__main__":
 
     data = FFHQlmdb(path=data_path,
                     image_size=args.size,
-                    split='test')
+                    split='test') # data lenth = 10000
+
     dataloader = torch.utils.data.DataLoader(data, 
                                             batch_size=args.batch, 
                                             num_workers=4, 
@@ -123,21 +124,50 @@ if __name__ == "__main__":
             latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None] + args.eps)
             latent_e = torch.stack([latent_e0, latent_e1], 1).view(cond.shape)
             
-            xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=latent_e, T=100)
-            image = model.render(xT, cond=latent_e, T=100)
+            # xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=latent_e, T=100)
+            # image = model.render(xT, cond=latent_e, T=100) # (16, 3, 128, 128)
+
+            # Generate random noise for each interpolated point
+            actual_pairs = batch['img'].size(0) // 2
+            noise = torch.randn_like(batch['img'][:actual_pairs]).to(device)  # Half batch size
+            xT_e0 = noise  # For first interpolation point
+            xT_e1 = noise  # Use same noise for second point for fair comparison
+
+            # Generate two sets of images from interpolated latents
+            image_e0 = model.render(xT_e0, cond=latent_e0, T=100)  # First interpolation point
+            image_e1 = model.render(xT_e1, cond=latent_e1, T=100)  # Second interpolation point (epsilon step)
+
+            # save image from tensor image
+            # image_save_1 = (image_e0.detach().cpu().numpy() * 255).astype(np.uint8)
+            # image_save_1 = np.transpose(image_save_1, (0, 2, 3, 1))
+            
+            # for i, img in enumerate(image_save_1):
+            #     img_pil = Image.fromarray(img)
+            #     img_pil.save(f"imgs/sefa/img1/img_{batch_size}_{i}.png")
+            
+            # image_save_2 = (image_e1.detach().cpu().numpy() * 255).astype(np.uint8)
+            # image_save_2 = np.transpose(image_save_2, (0, 2, 3, 1))
+            
+            # for i, img in enumerate(image_save_2):
+            #     img_pil = Image.fromarray(img)
+            #     img_pil.save(f"imgs/sefa/img2/img_{batch_size}_{i}.png")
 
             # normalize image
-            image = image * 2 - 1
-            raw_dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2)
+            image_e0 = image_e0 * 2 - 1
+            image_e1 = image_e1 * 2 - 1
+            raw_dist = percept(image_e0, image_e1).view(image_e0.shape[0])
 
             # eps = 1e-2  
             scaled_dist = raw_dist / (args.eps ** 2)
 
-            factor = image.shape[2] // 256
+            factor = image_e0.shape[2] // 256
         
             if factor > 1:
-                image = F.interpolate(
-                    image, size=(256, 256), mode="bilinear", align_corners=False
+                image_e0 = F.interpolate(
+                    image_e0, size=(256, 256), mode="bilinear", align_corners=False
+                )
+                image_e1 = F.interpolate(
+                    image_e1, size=(256, 256), mode="bilinear", align_corners=False
                 )
 
             # print("scaled_dist:", scaled_dist)
@@ -156,4 +186,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
+    print("finish sefa!\n", filtered_dist.mean())
     print("ppl projector eps 1e-2:", filtered_dist.mean())

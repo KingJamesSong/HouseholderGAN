@@ -39,6 +39,7 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
     """Estimates the second directional derivative of G w.r.t. its input at z in the direction x"""
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     # G_from_x , _  = G( z_ele - x for z_ele in z )
+    # decoder
     x = x.unsqueeze(0).to(z.device)
     G_to_x = G.forward(x=z+x,
                        t=t,
