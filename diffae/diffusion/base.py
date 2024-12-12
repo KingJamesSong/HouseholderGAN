@@ -44,12 +44,16 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
     G_to_x = G.forward(x=z+x,
                        t=t,
                        x_start=x_start)
+    G_to_x = listify(G_to_x.pred)
+
+    th.cuda.empty_cache()
+    
     G_from_x = G.forward(x=z-x,
                          t=t,
                          x_start=x_start)
-
-    G_to_x = listify(G_to_x.pred)
     G_from_x = listify(G_from_x.pred)
+
+    th.cuda.empty_cache()
     G_z = listify(G_z)
 
     eps_sqr = epsilon ** 2
@@ -65,6 +69,7 @@ def multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon):
     
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     G_to_x = listify(G_to_x.pred)
+    th.cuda.empty_cache()
     G_z = listify(G_z)
 
     fdd = [(G2x - G_z_base) / epsilon for G2x, G_z_base in zip(G_to_x, G_z)]
