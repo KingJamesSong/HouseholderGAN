@@ -42,6 +42,9 @@ if __name__ == "__main__":
         "--space", default="w", choices=["z", "w"], help="space that PPL calculated with"
     )
     parser.add_argument(
+        "--exp_name", type=str, default="sefa", help="experiment name"
+    )
+    parser.add_argument(
         "--batch", type=int, default=16, help="batch size for the models"
     )
     parser.add_argument(
@@ -106,7 +109,9 @@ if __name__ == "__main__":
 
 
     with torch.no_grad():
+        epoch = 0
         for batch_size in tqdm(batch_sizes):
+            epoch += 1
 
             batch = next(iter(dataloader))
 
@@ -143,14 +148,16 @@ if __name__ == "__main__":
             
             # for i, img in enumerate(image_save_1):
             #     img_pil = Image.fromarray(img)
-            #     img_pil.save(f"imgs/sefa/img1/img_{batch_size}_{i}.png")
+            #     os.makedirs(f"imgs/{args.exp_name}/{epoch}/img1/", exist_ok=True)
+            #     img_pil.save(f"imgs/{args.exp_name}/{epoch}/img1/img_{i}.png")
             
             # image_save_2 = (image_e1.detach().cpu().numpy() * 255).astype(np.uint8)
             # image_save_2 = np.transpose(image_save_2, (0, 2, 3, 1))
             
             # for i, img in enumerate(image_save_2):
             #     img_pil = Image.fromarray(img)
-            #     img_pil.save(f"imgs/sefa/img2/img_{batch_size}_{i}.png")
+            #     os.makedirs(f"imgs/{args.exp_name}/{epoch}/img2/", exist_ok=True)
+            #     img_pil.save(f"imgs/{args.exp_name}/{epoch}/img2/img_{i}.png")
 
             # normalize image
             image_e0 = image_e0 * 2 - 1
@@ -187,4 +194,4 @@ if __name__ == "__main__":
     )
 
     print("finish sefa!\n", filtered_dist.mean())
-    print("ppl projector eps 1e-2:", filtered_dist.mean())
+    print("ppl sefa eps 1e-1:", filtered_dist.mean())
