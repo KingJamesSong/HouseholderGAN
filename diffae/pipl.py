@@ -115,38 +115,59 @@ if __name__ == "__main__":
                                             shuffle=True)
 
     with torch.no_grad():
-        for batch in tqdm(batch_sizes):
+        epoch = 0
+        for batch_size in tqdm(batch_sizes):
+            epoch += 1
+
             batch = next(iter(dataloader))
 
             model.ema_model.eval()
             model.ema_model.to(device='cuda:0')
             cond = model.encode(batch['img'].to(device))
-            #Random Eigenvector Direction
-            # key = np.random.randint(0, int(math.log(args.size, 2))-2)
-            j = np.random.randint(0, 10)
-            # value_list = list(ema_value)[key] ### ？
-            # ema_value shape (512, 512)
-            
-            xT = model.encode_stochastic(batch['img'].to(device='cuda:0'), cond=cond, T=100)
 
+            if args.sampling == "full":
+                lerp_t = torch.rand(cond.shape[0]//2, device=device)
+            else:
+                lerp_t = torch.zeros(cond.shape[0]//2, device=device)
+
+            latent_t0, latent_t1 = cond[::2], cond[1::2]
+            latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
+            #Random Eigenvector Direction
+            j = np.random.randint(0, 10)
             value_list = ema_value
             direction = value_list[:, j].unsqueeze(0).to(cond.device)
-            direction = direction / direction.norm()
+            direction = direction / direction.norm() 
+            latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None]) + args.eps * direction
+            latent_e = torch.stack([latent_e0, latent_e1], 1).view(cond.shape)
 
-            image = model.render(xT, cond=cond + direction, T=100)
+            
+
+            # Generate random noise for each interpolated point
+            actual_pairs = batch['img'].size(0) // 2
+            noise = torch.randn_like(batch['img'][:actual_pairs]).to(device)  # Half batch size
+            xT_e0 = noise  # For first interpolation point
+            xT_e1 = noise  # Use same noise for second point for fair comparison
+
+            # Generate two sets of images from interpolated latents
+            image_e0 = model.render(xT_e0, cond=latent_e0, T=100)  # First interpolation point
+            image_e1 = model.render(xT_e1, cond=latent_e1, T=100)  # Second interpolation point (epsilon step)
 
             # normalize image
-            image = image * 2 - 1
-            raw_dist = percept(image[::2], image[1::2]).view(image.shape[0] // 2)
+            image_e0 = image_e0 * 2 - 1
+            image_e1 = image_e1 * 2 - 1
+            raw_dist = percept(image_e0, image_e1).view(image_e0.shape[0])
 
-            eps = 1
-            scaled_dist = raw_dist / (eps ** 2)
+            # eps = 1e-2  
+            scaled_dist = raw_dist / (args.eps ** 2)
 
-            factor = image.shape[2] // 256
+            factor = image_e0.shape[2] // 256
 
             if factor > 1:
-                image = F.interpolate(
-                    image, size=(args.size, args.size), mode="bilinear", align_corners=False
+                image_e0 = F.interpolate(
+                    image_e0, size=(args.size, args.size), mode="bilinear", align_corners=False
+                )
+                image_e1 = F.interpolate(
+                    image_e1, size=(args.size, args.size), mode="bilinear", align_corners=False
                 )
 
             # print("scaled_dist:", scaled_dist)
@@ -162,4 +183,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
+    print("finish sefa pipl!\n", filtered_dist.mean())
     print("pipl sefa:", filtered_dist.mean())
