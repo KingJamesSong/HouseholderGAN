@@ -18,6 +18,7 @@ from typing import NamedTuple, Tuple
 from choices import *
 from torch.cuda.amp import autocast
 import torch.nn.functional as F
+import pdb
 
 from dataclasses import dataclass
 
@@ -35,22 +36,34 @@ def rademacher(shape, device='cpu'):
     x[x == 0] = -1  # Turn the 0s into -1s
     return x
 
-def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon):
+def multi_layer_second_directional_derivative(G, x_t, t, x_start, z, x, G_z, epsilon):
     """Estimates the second directional derivative of G w.r.t. its input at z in the direction x"""
+    """
+    G: model
+    x_t: input noisy image
+    t: time step
+    x_start: input
+    z: latent code
+    x: direction
+    G_z: original output of G
+    epsilon: step size
+    """
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     # G_from_x , _  = G( z_ele - x for z_ele in z )
     # decoder
     x = x.unsqueeze(0).to(z.device)
-    G_to_x = G.forward(x=z+x,
+    G_to_x = G.forward(x=x_t,
                        t=t,
-                       x_start=x_start)
+                       x_start=x_start,
+                       cond=z+x)
     G_to_x = listify(G_to_x.pred)
 
     th.cuda.empty_cache()
     
-    G_from_x = G.forward(x=z-x,
+    G_from_x = G.forward(x=x_t,
                          t=t,
-                         x_start=x_start)
+                         x_start=x_start,
+                         cond=z-x)
     G_from_x = listify(G_from_x.pred)
 
     th.cuda.empty_cache()
@@ -60,12 +73,13 @@ def multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
     sdd = [(G2x - 2 * G_z_base + Gfx) / eps_sqr for G2x, G_z_base, Gfx in zip(G_to_x, G_z, G_from_x)]
     return sdd
 
-def multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon):
+def multi_layer_first_directional_derivative(G, x_t, t, x_start, z, x, G_z, epsilon):
     """Estimates the first directional derivative of G w.r.t. its input at z in the direction x"""
     x = x.unsqueeze(0).to(z.device)
-    G_to_x = G.forward(x=x+z,
+    G_to_x = G.forward(x=x_t,
                        t=t,
-                       x_start=x_start)
+                       x_start=x_start,
+                       cond=z+x)
     
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
     G_to_x = listify(G_to_x.pred)
@@ -90,25 +104,25 @@ def multi_stack_var_and_reduce(sdds, reduction=th.max, return_separately=False):
         sum_of_penalties += penalty if not return_separately else [penalty]
     return sum_of_penalties
 
-def hessian_penalty(G, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
+def hessian_penalty(G, x_t, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
     rademacher_size = th.Size((k, *z[0].size()))  # (k, N, z.size())
     # xs = epsilon * rademacher(rademacher_size, device=G.device)
     xs = epsilon * rademacher(rademacher_size)
     second_orders = []
     for x in xs:  # Iterate over each (N, z.size()) tensor in xs
-        central_second_order = multi_layer_second_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
+        central_second_order = multi_layer_second_directional_derivative(G, x_t, t, x_start, z, x, G_z, epsilon)
         second_orders.append(central_second_order)  # Appends a tensor with shape equal to G(z).size()
     loss = multi_stack_var_and_reduce(second_orders, reduction)  # (k, G(z).size()) --> scalar
     return loss
 
 
-def ortho_jacob(G, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
+def ortho_jacob(G, x_t, t, x_start, z, G_z, k=2, epsilon=1, reduction=th.max):
     rademacher_size = th.Size((k, *z[0].size()))  # (k, N, z.size())
     # xs = epsilon * rademacher(rademacher_size, device=G.device)
     xs = epsilon * rademacher(rademacher_size)
     first_orders = []
     for x in xs:  # Iterate over each (N, z.size()) tensor in xs
-        first_order = multi_layer_first_directional_derivative(G, t, x_start, z, x, G_z, epsilon)
+        first_order = multi_layer_first_directional_derivative(G, x_t, t, x_start, z, x, G_z, epsilon)
         first_orders.append(first_order)  # Appends a tensor with shape equal to G(z).size()
     loss = multi_stack_var_and_reduce(first_orders, reduction)  # (k, G(z).size()) --> scalar
     return loss
@@ -214,7 +228,7 @@ class GaussianDiffusionBeatGans:
         if noise is None:
             noise = th.randn_like(x_start)
 
-        x_t = self.q_sample(x_start, t, noise=noise)
+        x_t = self.q_sample(x_start, t, noise=noise)  # forward diffusion, x_t is the noisy image
 
         terms = {'x_t': x_t}
 
@@ -273,9 +287,10 @@ class GaussianDiffusionBeatGans:
         cond = model_forward.cond  # shape (4, 512)
         if self.conf.use_hessian_penalty:
             hessian_penalty_loss = hessian_penalty(G=model,
+                                                   x_t=x_t.detach(),
                                                    t=self._scale_timesteps(t), 
                                                    x_start=x_start.detach(),
-                                                   z=x_t.detach(), 
+                                                   z=cond.detach(), 
                                                    G_z=model_output,  
                                                    k=2, 
                                                    epsilon=1, 
@@ -283,9 +298,10 @@ class GaussianDiffusionBeatGans:
             terms["loss"] += hessian_penalty_loss
         elif self.conf.use_ortho_jacob:
             ortho_jacob_loss = ortho_jacob(G=model,
+                                           x_t=x_t.detach(),
                                            t=self._scale_timesteps(t), 
                                            x_start=x_start.detach(),
-                                           z=x_t.detach(), 
+                                           z=cond.detach(), 
                                            G_z=model_output, 
                                            k=2, 
                                            epsilon=1,
