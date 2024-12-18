@@ -139,7 +139,7 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     rescale_timesteps: bool
     fp16: bool
     train_pred_xstart_detach: bool = True
-    use_hessian_penalty: bool = True
+    use_hessian_penalty: bool = False
     use_ortho_jacob: bool = False
 
     def make_sampler(self):

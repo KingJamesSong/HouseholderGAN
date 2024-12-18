@@ -145,7 +145,7 @@ if __name__ == "__main__":
     with torch.no_grad():  # Disable gradient computation
         img = model.render(xT, cond=cond, T=100)
     grid0 = utils.save_image(img,
-        os.path.join(args.output_dir, f"{args.out_prefix}_original_1205.png"),
+        os.path.join(args.output_dir, f"{args.out_prefix}_original_1218.png"),
         normalize=True,
         value_range=(0, 1),
         nrow=args.n_sample,

@@ -900,7 +900,14 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
             #         print(weight.shape)
             #         projection_layer_in_middleblock.intialize(weight)
             #         break
-            #     break
+            # #     break
+            # modulate = {
+            #     k: v
+            #     for k, v in model_state_dict.items()
+            #     if "time_embed" in k and "weight" in k and "ema_model" not in k
+            # }
+            # print(modulate.keys())
+            # pdb.set_trace()
             
             model.load_state_dict(model_state_dict, strict=False)
         else:
