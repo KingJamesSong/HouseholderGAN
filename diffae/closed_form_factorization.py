@@ -107,5 +107,7 @@ if __name__ == "__main__":
             # weight_mat.append(v)
             eigvec = torch.svd(v).V.to("cpu")
             eigvec_[k] = eigvec
+        
+        print(eigvec_)
 
         torch.save(eigvec_, args.out)

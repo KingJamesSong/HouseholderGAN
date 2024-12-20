@@ -183,5 +183,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish sefa pipl!\n", filtered_dist.mean())
-    print("pipl sefa:", filtered_dist.mean())
+    print("finish OrJaR pipl!\n", filtered_dist.mean())
+    print("pipl OrJaR:", filtered_dist.mean())

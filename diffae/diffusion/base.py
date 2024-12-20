@@ -140,7 +140,7 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     fp16: bool
     train_pred_xstart_detach: bool = True
     use_hessian_penalty: bool = False
-    use_ortho_jacob: bool = False
+    use_ortho_jacob: bool = True
 
     def make_sampler(self):
         return GaussianDiffusionBeatGans(self)

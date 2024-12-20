@@ -21,7 +21,8 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
     is_ortho: bool = False
-    is_ortho_multi: bool = True
+    is_ortho_multi: bool = False
+    use_mlp_multi: bool = False
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -63,18 +64,18 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         ).make_model()
 
         
-        
-        if conf.is_ortho_multi:
-            self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
-            self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
-            self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
-        else:
-            # hidden_dim_enc = 512
-            # hidden_dim_mid = 512
-            # hidden_dim_dec = 512
-            self.style_enc = nn.Linear(512, 512)    
-            self.style_mid = nn.Linear(512, 512)
-            self.style_dec = nn.Linear(512, 512)
+        if conf.use_mlp_multi:
+            if conf.is_ortho_multi:
+                self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
+                self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
+                self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
+            else:
+                # hidden_dim_enc = 512
+                # hidden_dim_mid = 512
+                # hidden_dim_dec = 512
+                self.style_enc = nn.Linear(512, 512)    
+                self.style_mid = nn.Linear(512, 512)
+                self.style_dec = nn.Linear(512, 512)
 
         if conf.latent_net_conf is not None:
             self.latent_net = conf.latent_net_conf.make_model()
@@ -213,9 +214,14 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         mid_time_emb = emb
         dec_time_emb = emb
         # where in the model to supply style conditions
-        enc_cond_emb = self.style_enc(cond_emb)
-        mid_cond_emb = self.style_mid(cond_emb)
-        dec_cond_emb = self.style_dec(cond_emb)
+        if self.conf.use_mlp_multi:
+            enc_cond_emb = self.style_enc(cond_emb)
+            mid_cond_emb = self.style_mid(cond_emb)
+            dec_cond_emb = self.style_dec(cond_emb)
+        else:
+            enc_cond_emb = cond_emb
+            mid_cond_emb = cond_emb
+            dec_cond_emb = cond_emb
 
         # hs = []
         hs = [[] for _ in range(len(self.conf.channel_mult))]
