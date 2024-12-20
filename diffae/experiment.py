@@ -885,31 +885,36 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     if not os.path.exists(conf.logdir):
         os.makedirs(conf.logdir)
-    checkpoint_path = 'checkpoints/ffhq128_autoenc_130M/last.ckpt'
+    checkpoint_path = 'checkpoints/1218_ffhq128_autoenc_130M_multi_mlp/checkpoints/epoch=60-step=133407.ckpt'
     print('ckpt path:', checkpoint_path)
     if mode == 'train':
         if os.path.exists(checkpoint_path):
             
             state = torch.load(checkpoint_path, map_location='cpu')
             model_state_dict = state['state_dict']
-            # for name0, layer0 in model.model.middle_block.named_modules():
-            #     resnet_in_middleblock = layer0[0]
-            #     for name1, layer1 in resnet_in_middleblock.in_layers.named_modules():
-            #         projection_layer_in_middleblock = layer1[2]
-            #         weight = model_state_dict['model.middle_block.0.in_layers.2.weight']
-            #         print(weight.shape)
-            #         projection_layer_in_middleblock.intialize(weight)
-            #         break
-            # #     break
+            for name, layer in model.named_modules():
+                if "style_enc" in name or "style_mid" in name or "style_dec" in name:
+                    print(name + '.weight')
+                    weight = model_state_dict[name + '.weight']
+                    layer = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=True, diag_size=10)
+                    layer.intialize(weight_matrix=weight)
+                    # save the layer
+                    model_state_dict[name + '.U'] = layer.U
+                    model_state_dict[name + '.V'] = layer.V
+                    # remove the weight
+                    del model_state_dict[name + '.weight']
             # modulate = {
             #     k: v
             #     for k, v in model_state_dict.items()
-            #     if "time_embed" in k and "weight" in k and "ema_model" not in k
+            #     if ("style_enc" in k or "style_mid" in k or "style_dec" in k) and "weight" in k and "ema_model" not in k
             # }
-            # print(modulate.keys())
-            # pdb.set_trace()
+            # # dict_keys(['model.style_enc.weight', 'model.style_mid.weight', 'model.style_dec.weight'])
+            # for k, v in modulate.items():
+            #     weight = model_state_dict[k]
+            #     layer = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
+            #     layer.intialize(weight_matrix=weight)
             
-            model.load_state_dict(model_state_dict, strict=False)
+            model.load_state_dict(model_state_dict, strict=True)
         else:
             if conf.continue_from is not None:
                 # continue from a checkpoint
