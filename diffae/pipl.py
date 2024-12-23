@@ -183,5 +183,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish OrJaR pipl!\n", filtered_dist.mean())
-    print("pipl OrJaR:", filtered_dist.mean())
+    print("finish multi projectors pipl!\n", filtered_dist.mean())
+    print("pipl multi projectors eps 1e-1:", filtered_dist.mean())

@@ -21,8 +21,8 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
     is_ortho: bool = False
-    is_ortho_multi: bool = False
-    use_mlp_multi: bool = False
+    is_ortho_multi: bool = True
+    use_mlp_multi: bool = True
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -66,9 +66,9 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         
         if conf.use_mlp_multi:
             if conf.is_ortho_multi:
-                self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
-                self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
-                self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho, diag_size=10)
+                self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
+                self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
+                self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
             else:
                 # hidden_dim_enc = 512
                 # hidden_dim_mid = 512

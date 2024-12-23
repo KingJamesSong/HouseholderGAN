@@ -164,7 +164,7 @@ if __name__ == "__main__":
         for j in range(args.diag_size):
             imglists = []
             cond = cond_orig.clone()
-            for i in np.linspace(-3, 3, 7):
+            for i in np.linspace(-6, 6, 3):
                 direction = eigvec_dict[key][:, j].unsqueeze(0).to(device='cuda:0') # (1, 512)
                 direction = direction / direction.norm()
                 
