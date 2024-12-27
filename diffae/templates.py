@@ -196,7 +196,7 @@ def ffhq128_autoenc_130M():
     conf.total_samples = 130_000_000
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
-    conf.name = '1217_ffhq128_autoenc_130M_HP'
+    conf.name = '1226_ffhq128_autoenc_130M_multi_ortho'
     return conf
 
 

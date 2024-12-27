@@ -152,15 +152,15 @@ class TrainConfig(BaseConfig):
     T: int = 1_000
     total_samples: int = 10_000_000
     warmup: int = 0
-    pretrain: PretrainConfig = pretrain_ffhq128_autoenc_130M
+    pretrain: PretrainConfig = None
     continue_from: PretrainConfig = None
     eval_programs: Tuple[str] = None
     # if present load the checkpoint from this path instead
     eval_path: str = None
     base_dir: str = 'checkpoints'
     use_cache_dataset: bool = False
-    data_cache_dir: str = os.path.expanduser('~/cache')
-    work_cache_dir: str = os.path.expanduser('~/mycache')
+    data_cache_dir: str = os.path.expanduser('/nfs/data_chaos/czhang/cache')
+    work_cache_dir: str = os.path.expanduser('/nfs/data_chaos/czhang/mycache')
     # to be overridden
     name: str = '1022_ffhq128_autoenc_130M'
 
@@ -184,7 +184,7 @@ class TrainConfig(BaseConfig):
     def fid_cache(self):
         # we try to use the local dirs to reduce the load over network drives
         # hopefully, this would reduce the disconnection problems with sshfs
-        return f'{self.work_cache_dir}/eval_images/{self.data_name}_size{self.img_size}_{self.eval_num_images}'
+        return f'{self.work_cache_dir}/eval_images/{self.name}/{self.data_name}_size{self.img_size}_{self.eval_num_images}'
 
     @property
     def data_path(self):
