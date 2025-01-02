@@ -2,9 +2,9 @@
 #SBATCH -p chaos
 #SBATCH -A shared-mhug-staff
 #SBATCH -t 23:59:00
-#SBATCH --gres gpu:1
-#SBATCH -o o_file/eval/1226_ffhq128_3_ortho.o
-#SBATCH -e e_file/eval/1226_ffhq128_3_ortho.e
+#SBATCH --gres gpu:2
+#SBATCH -o o_file/train/0102_horse128_OrJaR.o
+#SBATCH -e e_file/train/0102_horse128_OrJaR.e
 
 source /nfs/data_chaos/czhang/anaconda3/bin/activate
 
@@ -14,4 +14,4 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 wandb login '61bbe1cdd46fd39ea897e6088bb2113126178cd8'
 
 
-python run_ffhq128.py  > out_file/eval/1226_ffhq128_3_ortho.out 
+python run_horse128.py  > out_file/train/0102_horse128_OrJaR.out 

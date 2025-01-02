@@ -885,7 +885,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     if mode == 'train' and not os.path.exists(conf.logdir):
         os.makedirs(conf.logdir)
-    checkpoint_path = 'checkpoints/1220_ffhq128_autoenc_130M_multi_ortho/checkpoints/epoch=40-step=89667.ckpt'
+    checkpoint_path = 'checkpoints/horse128_autoenc/last.ckpt'
     print('ckpt path:', checkpoint_path)
     if mode == 'train':
         if os.path.exists(checkpoint_path):
@@ -909,7 +909,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
             # print(modulate.keys())
             # pdb.set_trace()
             
-            model.load_state_dict(model_state_dict, strict=True)
+            model.load_state_dict(model_state_dict, strict=False)
         else:
             if conf.continue_from is not None:
                 # continue from a checkpoint

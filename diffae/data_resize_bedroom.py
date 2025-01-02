@@ -66,7 +66,7 @@ if __name__ == "__main__":
     from tqdm import tqdm
 
     # path to the original lsun's lmdb
-    src_path = 'datasets/bedroom_train_lmdb'
+    src_path = '/nfs/datasets/chenyu/lsun/bedroom/bedroom_train_lmdb'
     out_path = 'datasets/bedroom256.lmdb'
 
     dataset = LSUNClass(root=os.path.expanduser(src_path))

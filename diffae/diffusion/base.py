@@ -52,22 +52,23 @@ def multi_layer_second_directional_derivative(G, x_t, t, x_start, z, x, G_z, eps
     # G_from_x , _  = G( z_ele - x for z_ele in z )
     # decoder
     x = x.unsqueeze(0).to(z.device)
-    G_to_x = G.forward(x=x_t,
+    with th.no_grad():
+        G_to_x = G.forward(x=x_t,
                        t=t,
                        x_start=x_start,
                        cond=z+x)
-    G_to_x = listify(G_to_x.pred)
+        G_to_x = listify(G_to_x.pred)
 
-    th.cuda.empty_cache()
+    # th.cuda.empty_cache()
     
-    G_from_x = G.forward(x=x_t,
-                         t=t,
-                         x_start=x_start,
-                         cond=z-x)
-    G_from_x = listify(G_from_x.pred)
+        G_from_x = G.forward(x=x_t,
+                            t=t,
+                            x_start=x_start,
+                            cond=z-x)
+        G_from_x = listify(G_from_x.pred)
 
-    th.cuda.empty_cache()
-    G_z = listify(G_z)
+    # th.cuda.empty_cache()
+        G_z = listify(G_z)
 
     eps_sqr = epsilon ** 2
     sdd = [(G2x - 2 * G_z_base + Gfx) / eps_sqr for G2x, G_z_base, Gfx in zip(G_to_x, G_z, G_from_x)]
@@ -76,15 +77,16 @@ def multi_layer_second_directional_derivative(G, x_t, t, x_start, z, x, G_z, eps
 def multi_layer_first_directional_derivative(G, x_t, t, x_start, z, x, G_z, epsilon):
     """Estimates the first directional derivative of G w.r.t. its input at z in the direction x"""
     x = x.unsqueeze(0).to(z.device)
-    G_to_x = G.forward(x=x_t,
-                       t=t,
-                       x_start=x_start,
-                       cond=z+x)
+    with th.no_grad():
+        G_to_x = G.forward(x=x_t,
+                        t=t,
+                        x_start=x_start,
+                        cond=z+x)
     
     # G_to_x ,   _  = G( z_ele + x for z_ele in z )
-    G_to_x = listify(G_to_x.pred)
-    th.cuda.empty_cache()
-    G_z = listify(G_z)
+        G_to_x = listify(G_to_x.pred)
+        # th.cuda.empty_cache()
+        G_z = listify(G_z)
 
     fdd = [(G2x - G_z_base) / epsilon for G2x, G_z_base in zip(G_to_x, G_z)]
     return fdd
@@ -139,7 +141,7 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     rescale_timesteps: bool
     fp16: bool
     train_pred_xstart_detach: bool = True
-    use_hessian_penalty: bool = False
+    use_hessian_penalty: bool = True
     use_ortho_jacob: bool = False
 
     def make_sampler(self):

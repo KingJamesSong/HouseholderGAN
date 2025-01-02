@@ -1,18 +1,18 @@
 import argparse
 import multiprocessing
 import os
-import shutil
+from os.path import join, exists
 from functools import partial
 from io import BytesIO
-from multiprocessing import Process, Queue
-from os.path import exists, join
+import shutil
 
 import lmdb
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
 from torchvision.datasets import LSUNClass
 from torchvision.transforms import functional as trans_fn
 from tqdm import tqdm
+
+from multiprocessing import Process, Queue
 
 
 def resize_and_convert(img, size, resample, quality=100):
@@ -43,6 +43,9 @@ def resize_worker(idx, img, sizes, resample):
     return idx, out
 
 
+from torch.utils.data import Dataset, DataLoader
+
+
 class ConvertDataset(Dataset):
     def __init__(self, data) -> None:
         self.data = data
@@ -63,15 +66,16 @@ if __name__ == "__main__":
     from tqdm import tqdm
 
     # path to the original lsun's lmdb
-    src_path = '/nfs/datasets/chenyu/lsun/horse/horse'
-    out_path = 'datasets/horse256.lmdb'
+    src_path = '/nfs/datasets/chenyu/lsun/tower/tower_train_lmdb'
+    out_path = 'datasets/tower256.lmdb'
 
     dataset = LSUNClass(root=os.path.expanduser(src_path))
     dataset = ConvertDataset(dataset)
     loader = DataLoader(dataset,
                         batch_size=50,
-                        num_workers=16,
-                        collate_fn=lambda x: x)
+                        num_workers=12,
+                        collate_fn=lambda x: x,
+                        shuffle=False)
 
     target = os.path.expanduser(out_path)
     if os.path.exists(target):
