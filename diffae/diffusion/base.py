@@ -143,6 +143,8 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     train_pred_xstart_detach: bool = True
     use_hessian_penalty: bool = True
     use_ortho_jacob: bool = False
+    HP_weight: float = 0.2
+    ortho_weight: float = 0.2
 
     def make_sampler(self):
         return GaussianDiffusionBeatGans(self)
@@ -297,7 +299,7 @@ class GaussianDiffusionBeatGans:
                                                    k=2, 
                                                    epsilon=1, 
                                                    reduction=th.max)
-            terms["loss"] += hessian_penalty_loss
+            terms["loss"] += self.conf.HP_weight * hessian_penalty_loss
         elif self.conf.use_ortho_jacob:
             ortho_jacob_loss = ortho_jacob(G=model,
                                            x_t=x_t.detach(),
@@ -308,7 +310,7 @@ class GaussianDiffusionBeatGans:
                                            k=2, 
                                            epsilon=1,
                                            reduction=th.max)
-            terms["loss"] += ortho_jacob_loss
+            terms["loss"] += self.conf.ortho_weight * ortho_jacob_loss
 
         return terms
 
