@@ -236,7 +236,7 @@ def bedroom128_autoenc():
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
     conf.total_samples = 120_000_000
-    conf.name = '0107_bedroom128_HP'
+    conf.name = '0108_bedroom128_HP'
     return conf
 
 

@@ -885,7 +885,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     if mode == 'train' and not os.path.exists(conf.logdir):
         os.makedirs(conf.logdir)
-    checkpoint_path = 'checkpoints/0106_bedroom128_HP/checkpoints/epoch=0-step=94782.ckpt'
+    checkpoint_path = 'checkpoints/0107_horse128_autoenc_HP/checkpoints/epoch=0-step=62510.ckpt'
     print('ckpt path:', checkpoint_path)
     if mode == 'train':
         if os.path.exists(checkpoint_path):
@@ -901,15 +901,22 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
             #         projection_layer_in_middleblock.intialize(weight)
             #         break
             # #     break
-            # modulate = {
-            #     k: v
-            #     for k, v in model_state_dict.items()
-            #     if "time_embed" in k and "weight" in k and "ema_model" not in k
-            # }
-            # print(modulate.keys())
-            # pdb.set_trace()
+            for name, layer in model.model.named_modules():
+                if "style_enc" in name or "style_dec" in name or "style_mid" in name:
+                    weight = model_state_dict["model." + name + '.weight']
+                    weight_ema = model_state_dict["ema_model." + name + '.weight']
+                    print(name, weight_ema.shape)
+                    # layer.intialize(weight)
+                    layer.intialize(weight_ema)
+                    # save the U and V to the model and delete the weight
+                    del model_state_dict["model." + name + '.weight']
+                    del model_state_dict["ema_model." + name + '.weight']
+                    model_state_dict["model." + name + '.U'] = layer.U
+                    model_state_dict["model." + name + '.V'] = layer.V
+                    model_state_dict["ema_model." + name + '.U'] = layer.U
+                    model_state_dict["ema_model." + name + '.V'] = layer.V
             
-            model.load_state_dict(model_state_dict, strict=False)
+            model.load_state_dict(model_state_dict, strict=True)
         else:
             if conf.continue_from is not None:
                 # continue from a checkpoint
