@@ -92,7 +92,8 @@ if __name__ == "__main__":
         modulate = {
             k: v
             for k, v in ckpt['state_dict'].items()
-            if "time_embed" in k and "style" in k and "weight" in k and "ema_model" in k
+            # if "time_embed" in k and "style" in k and "weight" in k and "ema_model" in k
+            if ("style_enc" in k or "style_dec" in k or "style_mid" in k) and "weight" in k and "ema_model" in k
         }
 
         # weight shape: [512, 512]

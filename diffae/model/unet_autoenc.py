@@ -22,7 +22,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     latent_net_conf: MLPSkipNetConfig = None
     is_ortho: bool = False
     is_ortho_multi: bool = False
-    use_mlp_multi: bool = False
+    use_mlp_multi: bool = True
 
     def make_model(self):
         return BeatGANsAutoencModel(self)

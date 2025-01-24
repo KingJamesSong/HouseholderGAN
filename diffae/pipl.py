@@ -82,8 +82,9 @@ if __name__ == "__main__":
     #Load factor
     print('args', args.factor)
     eigvec_dict = torch.load(args.factor)
-    ema_key = [key for key in eigvec_dict.keys() if key.startswith('ema_')][0]
-    ema_value = eigvec_dict[ema_key]
+    ema_key = [key for key in eigvec_dict.keys() if key.startswith('ema_')]
+    len_key = len(ema_key)
+    # ema_value = eigvec_dict[ema_key]
     print(f"Using EMA key: {ema_key}")
     #Load checkpoint
     ckpt = torch.load(args.ckpt)
@@ -133,8 +134,9 @@ if __name__ == "__main__":
             latent_t0, latent_t1 = cond[::2], cond[1::2]
             latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
             #Random Eigenvector Direction
+            key = np.random.randint(0, len_key)
             j = np.random.randint(0, 10)
-            value_list = ema_value
+            value_list = list(eigvec_dict.values())[key]
             direction = value_list[:, j].unsqueeze(0).to(cond.device)
             direction = direction / direction.norm() 
             latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None]) + args.eps * direction
@@ -183,5 +185,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish multi projectors pipl!\n", filtered_dist.mean())
-    print("pipl multi projectors eps 1e-1:", filtered_dist.mean())
+    print("finish ffhq multi mlp pipl!\n", filtered_dist.mean())
+    print("pipl ffhq multi mlp eps 1e-1:", filtered_dist.mean())

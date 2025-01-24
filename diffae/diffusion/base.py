@@ -141,7 +141,7 @@ class GaussianDiffusionBeatGansConfig(BaseConfig):
     rescale_timesteps: bool
     fp16: bool
     train_pred_xstart_detach: bool = True
-    use_hessian_penalty: bool = True
+    use_hessian_penalty: bool = False
     use_ortho_jacob: bool = False
     HP_weight: float = 0.2
     ortho_weight: float = 0.2

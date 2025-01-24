@@ -13,7 +13,7 @@ from templates_latent import *
 import cv2
 from PIL import Image  
 from torchvision import transforms
-
+import pdb
 torch.random.manual_seed(15927)
 
 nodes = 1
@@ -84,7 +84,8 @@ if __name__ == "__main__":
     print('args', args.factor)
     eigvec_dict = torch.load(args.factor)
     # Get only the EMA key
-    ema_key = [key for key in eigvec_dict.keys() if key.startswith('ema_')][0]
+    ema_key = [key for key in eigvec_dict.keys() if key.startswith('ema_')]
+    # ema_key = ema_key[0]
     print(f"Using EMA key: {ema_key}")
     logdir = os.path.join(args.output_dir, 'logs')
 
@@ -121,18 +122,26 @@ if __name__ == "__main__":
     img_size = conf.img_size
     noise = torch.randn(args.n_sample, 3, img_size, img_size).to(device='cuda:0')
 
+    # data_path = 'datasets/bedroom256.lmdb'
+    # data = Bedroom_lmdb(path=data_path,
+    #                 image_size=args.size,
+    #                 split='test')
+    # save_dir = os.path.join('imgs', 'bedroom128')
+    # os.makedirs(save_dir, exist_ok=True)
+    # for i in range(50):
+    #     image = data[i]['img']
+    #     image = image.cpu().numpy().transpose(1, 2, 0) #(3, 128, 128)
+    #     image = (image + 1) / 2
+    #     image = (image * 255).clip(0, 255).astype(np.uint8)
+    #     image = Image.fromarray(image)  
+    #     image = image.resize((128, 128))
+    #     image.save(os.path.join(save_dir, f'image_{i}.png'))
+    
+    # pdb.set_trace()
 
-    # dummy = torch.zeros_like(noise).to(device='cuda:0')
+    data = ImageDataset('imgs/ffhq128', image_size=conf.img_size, exts=['jpg', 'JPG', 'png'], do_augment=False)
+    batch = data[3]['img'][None].to(device='cuda:0')
 
-    # transform = transforms.Compose([ transforms.Resize((128, 128)), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-    # image_path = 'imgs_align/sandy.png' 
-    # img_align = Image.open(image_path).convert("RGB") 
-    # image_tensor = transform(img_align).to(device='cuda:0')
-    # image_tensor = image_tensor.unsqueeze(0)
-
-
-    data = ImageDataset('imgs_align', image_size=conf.img_size, exts=['jpg', 'JPG', 'png'], do_augment=False)
-    batch = data[0]['img'][None].to(device='cuda:0')
 
     model.ema_model.eval()
     model.ema_model.to(device='cuda:0')
@@ -145,7 +154,7 @@ if __name__ == "__main__":
     with torch.no_grad():  # Disable gradient computation
         img = model.render(xT, cond=cond, T=100)
     grid0 = utils.save_image(img,
-        os.path.join(args.output_dir, f"{args.out_prefix}_original_1218.png"),
+        os.path.join(args.output_dir, f"{args.out_prefix}_original.png"),
         normalize=True,
         value_range=(0, 1),
         nrow=args.n_sample,
@@ -153,30 +162,28 @@ if __name__ == "__main__":
 
     # print("shape of ema_key: ", eigvec_dict[ema_key].shape)
     # pdb.set_trace()
-
-    # for index, key in enumerate(ema_key):
-    index = 0
-    key = ema_key
-    print(f"Processing layer {index}...")
+    
 
     cond_orig = cond.clone()
-    with torch.no_grad():
-        for j in range(args.diag_size):
-            imglists = []
-            cond = cond_orig.clone()
-            for i in np.linspace(-6, 6, 3):
-                direction = eigvec_dict[key][:, j].unsqueeze(0).to(device='cuda:0') # (1, 512)
-                direction = direction / direction.norm()
-                
-                # direction and cond are both (1, 512)
-                # forward pass to get the image
-                img1 = model.render(xT, cond=cond + i * direction, T=20)
-                imglists.append(img1)
+    for index, key in enumerate(ema_key):
+        print(f"Processing layer {index}...")
+        with torch.no_grad():
+            for j in range(args.diag_size):
+                imglists = []
+                cond = cond_orig.clone()
+                for i in np.linspace(-5, 5, 7):
+                    direction = eigvec_dict[key][:, j].unsqueeze(0).to(device='cuda:0') # (1, 512)
+                    direction = direction / direction.norm()
+                    
+                    # direction and cond are both (1, 512)
+                    # forward pass to get the image
+                    img1 = model.render(xT, cond=cond + i * direction, T=20)
+                    imglists.append(img1)
 
-            imgs = torch.cat(imglists, dim=0)
-            grid = utils.save_image(imgs,
-                os.path.join(args.output_dir, f"{args.out_prefix}_layer-{index}-index-{j}__all.png"),
-                normalize=True,
-                value_range=(0, 1),
-                nrow=args.n_sample,
-            )
+                imgs = torch.cat(imglists, dim=0)
+                grid = utils.save_image(imgs,
+                    os.path.join(args.output_dir, f"{args.out_prefix}_layer-{index}-index-{j}__all.png"),
+                    normalize=True,
+                    value_range=(0, 1),
+                    nrow=args.n_sample,
+                )
