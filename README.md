@@ -1,6 +1,7 @@
 # HouseholderGAN
 
 ICCV23 paper [Householder Projector for Unsupervised Latent Semantics Discovery](https://arxiv.org/pdf/2307.08012.pdf)
+The extended version has been set to IEEE Transactions on Pattern Analysis and Machine Intelligence, and is currently under review.
 
 <!--Eye Size          |                  Head                   |  Expression
 :-------------------------:|:---------------------------------------:|:-------------------------:
@@ -16,12 +17,14 @@ ICCV23 paper [Householder Projector for Unsupervised Latent Semantics Discovery]
 <img src="./imgs/shape.png.gif" width="200"> | <img src="./imgs/pose.png.gif" width="200"> |  <img src="./imgs/color.png.gif" width="200">-->
 
 <p align="center">
-<img src="householder1_full.png" width="800px"/>
+<img src="figure_architecture.pdf" width="800px"/>
   <br>
-Some identified attributes in StyleGAN2/StyleGAN3.
+  (1) Illustration on how our Householder Projector represents the modulation weight A of StyleGANs. (2) The EG3D framework integrated with our
+proposed projector.  (3) Diffusion Autoencoder (DiffAE) integrated with our projector.
+<!-- Some identified attributes in StyleGAN2/StyleGAN3. -->
 </p>
 
-This paper proposes Householder Projector, a flexible and general low-rank orthogonal matrix representation based on Householder transformations, to parameterize the projection matrix of StyleGANs. The orthogonality guarantees that the eigenvectors correspond to disentangled interpretable semantics, while the low-rank property encourages that each identified direction has meaningful variations. We integrate our projector into pre-trained StyleGAN2/StyleGAN3 and evaluate the models on several benchmarks. Within marginally 1\% of the original training steps for fine-tuning, our projector helps StyleGANs to discover more disentangled and precise semantic attributes without sacrificing image fidelity.
+This paper proposes Householder Projector, a flexible and general low-rank orthogonal matrix representation based on Householder transformations, to parameterize the projection matrix of GANs and DIffusions. The orthogonality guarantees that the eigenvectors correspond to disentangled interpretable semantics, while the low-rank property encourages that each identified direction has meaningful variations. We integrate our projector into pre-trained StyleGAN2/StyleGAN3/DiffAE and evaluate the models on several benchmarks. Within marginally 1\% of the original training steps for fine-tuning, our projector helps GANs and Diffusions to discover more disentangled and precise semantic attributes without sacrificing image fidelity.
 
 ## Environment
 
@@ -31,7 +34,7 @@ conda activate householdergan
 ```
 
 ## Pre-process Datasets
-All datasets can be downloaded from the official website. For StyleGAN2 pre-processing, please check and run [prepare_data.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN2/prepare_data.py). For StyleGAN3 pre-processing, please check and run [datset_tool.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN3/dataset_tool.py).
+All datasets can be downloaded from the official website. For StyleGAN2 pre-processing, please check and run [prepare_data.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN2/prepare_data.py). For StyleGAN3 pre-processing, please check and run [datset_tool.py](https://github.com/KingJamesSong/HouseholderGAN/blob/main/StyleGAN3/dataset_tool.py). For DiffAE pre-processing, please download the official LSUN Bedroom/Horse and FFHQ dataset and put the lmdb files under the ```diffae/datasets/``` directory.
 
 
 ## Usage of StyleGAN2 
@@ -144,6 +147,34 @@ python apply_factor.py --outdir=[save_results_path] --cfg=stylegan3-r  \
 wait
 ```
 
+## Usage of DiffAE
+```
+cd diffae/
+```
+Training on FFHQ:
+```
+python run_ffhq128.py 
+```
+Test on FFHQ:
+```
+python closed_form_factorization.py --out [factor_path] [checkpoint_path] --is_ortho &
+wait
+
+python apply_factor.py --output_dir [ouput_path] --ckpt [checkpoint_path] --factor [factor_path]  --size 128
+wait
+```
+Evaluation ppl/pipl:
+```
+python ppl.py --ckpt [checkpoint_path] --sampling full --eps 1e-1 --size 128 &
+wait
+
+python pipl.py --ckpt [checkpoint_path] --factor [factor_path]  --sampling full --eps 1e-1 --size 128 & 
+wait
+(don’t forget to set model is_ortho=True!)
+```
+
+
+
 ## Fine-tuned and Pre-trained Models
 
 We release the pre-trained StyleGANs and our fine-tuned models on different resolutions.
@@ -175,4 +206,4 @@ If you think the codes are helpful to your research, please consider citing our 
 
 If you have any questions or suggestions, please feel free to contact us
 
-`yue.song@unitn.it` or `jichao.zhang@unitn.it`
+`yue.song@unitn.it` or `jichao.zhang@unitn.it` or `chenyu.zhang@unitn.it`
