@@ -122,25 +122,32 @@ if __name__ == "__main__":
     img_size = conf.img_size
     noise = torch.randn(args.n_sample, 3, img_size, img_size).to(device='cuda:0')
 
-    # data_path = 'datasets/bedroom256.lmdb'
-    # data = Bedroom_lmdb(path=data_path,
-    #                 image_size=args.size,
-    #                 split='test')
-    # save_dir = os.path.join('imgs', 'bedroom128')
-    # os.makedirs(save_dir, exist_ok=True)
-    # for i in range(50):
-    #     image = data[i]['img']
-    #     image = image.cpu().numpy().transpose(1, 2, 0) #(3, 128, 128)
-    #     image = (image + 1) / 2
-    #     image = (image * 255).clip(0, 255).astype(np.uint8)
-    #     image = Image.fromarray(image)  
-    #     image = image.resize((128, 128))
-    #     image.save(os.path.join(save_dir, f'image_{i}.png'))
+    data_path = 'datasets/ffhq256.lmdb'
+    data = FFHQlmdb(path=data_path,
+                    image_size=args.size,
+                    split='test')
+    save_dir = os.path.join('imgs', 'ffhq128')
+    os.makedirs(save_dir, exist_ok=True)
+    for i in range(50):
+        image = data[i]['img']
+        image = image.cpu().numpy().transpose(1, 2, 0) #(3, 128, 128)
+        image = (image + 1) / 2
+        image = (image * 255).clip(0, 255).astype(np.uint8)
+        image = Image.fromarray(image)  
+        image = image.resize((128, 128))
+        image.save(os.path.join(save_dir, f'image_{i}.png'))
     
-    # pdb.set_trace()
+    pdb.set_trace()
 
-    data = ImageDataset('imgs/ffhq128', image_size=conf.img_size, exts=['jpg', 'JPG', 'png'], do_augment=False)
-    batch = data[3]['img'][None].to(device='cuda:0')
+    data = ImageDataset('imgs/ffhq128_new', image_size=conf.img_size, exts=['png'], do_augment=False, sort_names=True)
+    # path = data[3]['path']
+    # print(path)
+    # batch_idx = data[3]['index']
+    # print(f"batch_idx: {batch_idx}")
+    # pdb.set_trace()
+    # print("data[0]: ", data[0])
+    # pdb.set_trace()
+    batch = data[2]['img'][None].to(device='cuda:0')
 
 
     model.ema_model.eval()
@@ -158,6 +165,7 @@ if __name__ == "__main__":
         normalize=True,
         value_range=(0, 1),
         nrow=args.n_sample,
+        padding=0
     )
 
     # print("shape of ema_key: ", eigvec_dict[ema_key].shape)
@@ -171,13 +179,15 @@ if __name__ == "__main__":
             for j in range(args.diag_size):
                 imglists = []
                 cond = cond_orig.clone()
-                for i in np.linspace(-5, 5, 7):
+                for i in np.linspace(-5, 5, 5):
                     direction = eigvec_dict[key][:, j].unsqueeze(0).to(device='cuda:0') # (1, 512)
                     direction = direction / direction.norm()
                     
                     # direction and cond are both (1, 512)
                     # forward pass to get the image
-                    img1 = model.render(xT, cond=cond + i * direction, T=20)
+                    
+                    img1 = model.render(xT, cond=cond, T=20, layer_index=index, direction=i * direction)
+                    # img1 = model.render(xT, cond=cond + i * direction, T=20)
                     imglists.append(img1)
 
                 imgs = torch.cat(imglists, dim=0)
@@ -186,4 +196,5 @@ if __name__ == "__main__":
                     normalize=True,
                     value_range=(0, 1),
                     nrow=args.n_sample,
+                    padding=0
                 )

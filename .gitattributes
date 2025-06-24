@@ -1,0 +1,2 @@
+pretrained/FFHQ256_Fine-tuned.pt filter=lfs diff=lfs merge=lfs -text
+pretrained/FFHQ256_Pre-trained.pt filter=lfs diff=lfs merge=lfs -text

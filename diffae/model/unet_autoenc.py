@@ -21,7 +21,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     enc_grad_checkpoint: bool = False
     latent_net_conf: MLPSkipNetConfig = None
     is_ortho: bool = False
-    is_ortho_multi: bool = False
+    is_ortho_multi: bool = True
     use_mlp_multi: bool = True
 
     def make_model(self):
@@ -156,6 +156,9 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
             cond: output of the encoder
             noise: random noise (to predict the cond)
         """
+        if kwargs.get('layer_index') is not None:
+            layer_index = kwargs.get('layer_index')
+            direction = kwargs.get('direction')
 
         if t_cond is None:
             t_cond = t
@@ -215,9 +218,23 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         dec_time_emb = emb
         # where in the model to supply style conditions
         if self.conf.use_mlp_multi:
-            enc_cond_emb = self.style_enc(cond_emb)
-            mid_cond_emb = self.style_mid(cond_emb)
-            dec_cond_emb = self.style_dec(cond_emb)
+            if kwargs.get('layer_index') is not None: 
+                if layer_index == 0:
+                    enc_cond_emb = self.style_enc(cond_emb + direction)
+                    mid_cond_emb = self.style_mid(cond_emb)
+                    dec_cond_emb = self.style_dec(cond_emb)
+                elif layer_index == 1:
+                    enc_cond_emb = self.style_enc(cond_emb)
+                    mid_cond_emb = self.style_mid(cond_emb + direction)
+                    dec_cond_emb = self.style_dec(cond_emb)
+                elif layer_index == 2:
+                    enc_cond_emb = self.style_enc(cond_emb)
+                    mid_cond_emb = self.style_mid(cond_emb)
+                    dec_cond_emb = self.style_dec(cond_emb + direction)
+            else:
+                enc_cond_emb = self.style_enc(cond_emb)
+                mid_cond_emb = self.style_mid(cond_emb)
+                dec_cond_emb = self.style_dec(cond_emb)
         else:
             enc_cond_emb = cond_emb
             mid_cond_emb = cond_emb

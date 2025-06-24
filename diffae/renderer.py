@@ -46,6 +46,8 @@ def render_condition(
     sampler: Sampler,
     x_start=None,
     cond=None,
+    layer_index=None,
+    direction=None,
 ):
     if conf.train_mode == TrainMode.diffusion:
         assert conf.model_type.has_autoenc()
@@ -54,6 +56,8 @@ def render_condition(
             cond = model.encode(x_start)
         return sampler.sample(model=model,
                               noise=x_T,
-                              model_kwargs={'cond': cond})
+                              model_kwargs={'cond': cond,
+                                           'layer_index': layer_index,
+                                           'direction': direction})
     else:
         raise NotImplementedError()

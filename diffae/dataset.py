@@ -22,7 +22,7 @@ class ImageDataset(Dataset):
         do_augment: bool = True,
         do_transform: bool = True,
         do_normalize: bool = True,
-        sort_names=False,
+        sort_names=True,
         has_subdir: bool = True,
     ):
         super().__init__()
@@ -66,7 +66,7 @@ class ImageDataset(Dataset):
         img = img.convert('RGB')
         if self.transform is not None:
             img = self.transform(img)
-        return {'img': img, 'index': index}
+        return {'img': img, 'index': index, 'path': path}
 
 
 class SubsetDataset(Dataset):

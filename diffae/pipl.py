@@ -185,5 +185,5 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish ffhq multi mlp pipl!\n", filtered_dist.mean())
-    print("pipl ffhq multi mlp eps 1e-1:", filtered_dist.mean())
+    print("finish ffhq multi projector pipl!\n", filtered_dist.mean())
+    print("pipl ffhq multi projector eps 1e-1:", filtered_dist.mean())

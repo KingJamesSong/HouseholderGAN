@@ -89,6 +89,7 @@ if __name__ == "__main__":
         torch.save(eigvec_, args.out)
     else:
         ckpt = torch.load(args.ckpt)
+        # print(ckpt['state_dict'].keys())
         modulate = {
             k: v
             for k, v in ckpt['state_dict'].items()

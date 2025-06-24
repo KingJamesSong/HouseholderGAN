@@ -117,7 +117,7 @@ class LitModel(pl.LightningModule):
         pred_img = (pred_img + 1) / 2
         return pred_img
 
-    def render(self, noise, cond=None, T=None):
+    def render(self, noise, cond=None, T=None, layer_index=None, direction=None):
         if T is None:
             sampler = self.eval_sampler
         else:
@@ -128,7 +128,9 @@ class LitModel(pl.LightningModule):
                                         self.ema_model,
                                         noise,
                                         sampler=sampler,
-                                        cond=cond)
+                                        cond=cond,
+                                        layer_index=layer_index,
+                                        direction=direction)
         else:
             pred_img = render_uncondition(self.conf,
                                           self.ema_model,
@@ -885,7 +887,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
 
     if mode == 'train' and not os.path.exists(conf.logdir):
         os.makedirs(conf.logdir)
-    checkpoint_path = 'checkpoints/0107_horse128_autoenc_HP/checkpoints/epoch=0-step=62510.ckpt'
+    checkpoint_path = 'checkpoints/0212_ffhq128_autoenc_130M_multi_projector/checkpoints/epoch=54-step=120285.ckpt'
     print('ckpt path:', checkpoint_path)
     if mode == 'train':
         if os.path.exists(checkpoint_path):
@@ -901,20 +903,20 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
             #         projection_layer_in_middleblock.intialize(weight)
             #         break
             # #     break
-            for name, layer in model.model.named_modules():
-                if "style_enc" in name or "style_dec" in name or "style_mid" in name:
-                    weight = model_state_dict["model." + name + '.weight']
-                    weight_ema = model_state_dict["ema_model." + name + '.weight']
-                    print(name, weight_ema.shape)
-                    # layer.intialize(weight)
-                    layer.intialize(weight_ema)
-                    # save the U and V to the model and delete the weight
-                    del model_state_dict["model." + name + '.weight']
-                    del model_state_dict["ema_model." + name + '.weight']
-                    model_state_dict["model." + name + '.U'] = layer.U
-                    model_state_dict["model." + name + '.V'] = layer.V
-                    model_state_dict["ema_model." + name + '.U'] = layer.U
-                    model_state_dict["ema_model." + name + '.V'] = layer.V
+            # for name, layer in model.model.named_modules():
+            #     if "style_enc" in name or "style_dec" in name or "style_mid" in name:
+            #         weight = model_state_dict["model." + name + '.weight']
+            #         weight_ema = model_state_dict["ema_model." + name + '.weight']
+            #         print(name, weight_ema.shape)
+            #         # layer.intialize(weight)
+            #         layer.intialize(weight_ema)
+            #         # save the U and V to the model and delete the weight
+            #         del model_state_dict["model." + name + '.weight']
+            #         del model_state_dict["ema_model." + name + '.weight']
+            #         model_state_dict["model." + name + '.U'] = layer.U
+            #         model_state_dict["model." + name + '.V'] = layer.V
+            #         model_state_dict["ema_model." + name + '.U'] = layer.U
+            #         model_state_dict["ema_model." + name + '.V'] = layer.V
             
             model.load_state_dict(model_state_dict, strict=True)
         else:
