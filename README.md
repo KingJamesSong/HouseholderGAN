@@ -17,7 +17,7 @@ The extended version has been set to IEEE Transactions on Pattern Analysis and M
 <img src="./imgs/shape.png.gif" width="200"> | <img src="./imgs/pose.png.gif" width="200"> |  <img src="./imgs/color.png.gif" width="200">-->
 
 <p align="center">
-<img src="figure_architecture.pdf" width="800px"/>
+<img src="figure_architecture.png" width="800px"/>
   <br>
   (1) Illustration on how our Householder Projector represents the modulation weight A of StyleGANs. (2) The EG3D framework integrated with our
 proposed projector.  (3) Diffusion Autoencoder (DiffAE) integrated with our projector.
