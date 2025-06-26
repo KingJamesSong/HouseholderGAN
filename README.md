@@ -17,12 +17,26 @@ The extended version has been set to IEEE Transactions on Pattern Analysis and M
 <img src="./imgs/shape.png.gif" width="200"> | <img src="./imgs/pose.png.gif" width="200"> |  <img src="./imgs/color.png.gif" width="200">-->
 
 <p align="center">
-<img src="figure_architecture.png" width="800px"/>
+<img src="imgs/figure_architecture.png" width="800px"/>
   <br>
   (1) Illustration on how our Householder Projector represents the modulation weight A of StyleGANs. (2) The EG3D framework integrated with our
 proposed projector.  (3) Diffusion Autoencoder (DiffAE) integrated with our projector.
 <!-- Some identified attributes in StyleGAN2/StyleGAN3. -->
 </p>
+
+<p align="center">
+<img src="imgs/householder1_full.png" width="800px"/>
+  <br>
+Some identified attributes in StyleGAN2/StyleGAN3.
+</p>
+
+<p align="center">
+<img src="imgs/figure_d1.png" width="800px"/>
+  <br>
+Some identified attributes in DiffAE.
+</p>
+
+
 
 This paper proposes Householder Projector, a flexible and general low-rank orthogonal matrix representation based on Householder transformations, to parameterize the projection matrix of GANs and DIffusions. The orthogonality guarantees that the eigenvectors correspond to disentangled interpretable semantics, while the low-rank property encourages that each identified direction has meaningful variations. We integrate our projector into pre-trained StyleGAN2/StyleGAN3/DiffAE and evaluate the models on several benchmarks. Within marginally 1\% of the original training steps for fine-tuning, our projector helps GANs and Diffusions to discover more disentangled and precise semantic attributes without sacrificing image fidelity.
 
