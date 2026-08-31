@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH -p chaos
-#SBATCH -A shared-mhug-staff
+#SBATCH -p gpupart
+#SBATCH -A staff
 #SBATCH -t 23:59:00
 #SBATCH --gres gpu:2
-#SBATCH -o o_file/train/0106_bedroom128_OrJaR.o
-#SBATCH -e e_file/train/0106_bedroom128_OrJaR.e
+#SBATCH -o o_file/train/0127_bedroom128_multi_mlp_HP.o
+#SBATCH -e e_file/train/0127_bedroom128_multi_mlp_HP.e
 
 source /nfs/data_chaos/czhang/anaconda3/bin/activate
 
@@ -14,7 +14,7 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 wandb login '61bbe1cdd46fd39ea897e6088bb2113126178cd8'
 
 
-python run_bedroom128.py  > out_file/train/0106_bedroom128_OrJaR.out
+python run_bedroom128.py  > out_file/train/0127_bedroom128_multi_mlp_HP.out
 
 
 

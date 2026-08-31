@@ -196,7 +196,17 @@ def ffhq128_autoenc_130M():
     conf.total_samples = 130_000_000
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
-    conf.name = '1226_ffhq128_autoenc_130M_multi_ortho'
+    conf.name = '0214_ffhq128_autoenc_130M_multi_projector'
+    return conf
+
+
+def ffhq128_autoenc_rank_ablation(diag_size: int):
+    conf = ffhq128_autoenc_base()
+    conf.total_samples = 130_000_000
+    conf.eval_ema_every_samples = 10_000_000
+    conf.eval_every_samples = 10_000_000
+    conf.model_conf.diag_size = diag_size
+    conf.name = f'ffhq128_autoenc_rank{diag_size}'
     return conf
 
 
@@ -216,7 +226,7 @@ def horse128_autoenc():
     conf.total_samples = 130_000_000
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
-    conf.name = '0107_horse128_autoenc_HP'
+    conf.name = '0127_horse128_multi_mlp_OrJaR'
     return conf
 
 
@@ -236,7 +246,7 @@ def bedroom128_autoenc():
     conf.eval_ema_every_samples = 10_000_000
     conf.eval_every_samples = 10_000_000
     conf.total_samples = 120_000_000
-    conf.name = '0111_bedroom128_multi_ortho'
+    conf.name = '0202_bedroom128_multi_mlp_HP'
     return conf
 
 

@@ -903,6 +903,7 @@ def train(conf: TrainConfig, gpus, nodes=1, mode: str = 'train'):
             #         projection_layer_in_middleblock.intialize(weight)
             #         break
             # #     break
+
             # for name, layer in model.model.named_modules():
             #     if "style_enc" in name or "style_dec" in name or "style_mid" in name:
             #         weight = model_state_dict["model." + name + '.weight']
