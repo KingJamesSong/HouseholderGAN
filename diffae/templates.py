@@ -200,6 +200,16 @@ def ffhq128_autoenc_130M():
     return conf
 
 
+def ffhq128_autoenc_rank_ablation(diag_size: int):
+    conf = ffhq128_autoenc_base()
+    conf.total_samples = 130_000_000
+    conf.eval_ema_every_samples = 10_000_000
+    conf.eval_every_samples = 10_000_000
+    conf.model_conf.diag_size = diag_size
+    conf.name = f'ffhq128_autoenc_rank{diag_size}'
+    return conf
+
+
 def horse128_ddpm():
     conf = ffhq128_ddpm()
     conf.data_name = 'horse256'

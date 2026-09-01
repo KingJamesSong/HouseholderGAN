@@ -23,6 +23,7 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     is_ortho: bool = False
     is_ortho_multi: bool = True
     use_mlp_multi: bool = True
+    diag_size: int = 10
 
     def make_model(self):
         return BeatGANsAutoencModel(self)
@@ -38,6 +39,7 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
             time_channels=conf.model_channels,
             time_out_channels=conf.embed_channels,
             is_ortho=conf.is_ortho,
+            diag_size=conf.diag_size,
         )
 
         self.encoder = BeatGANsEncoderConfig(
@@ -66,9 +68,9 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
         
         if conf.use_mlp_multi:
             if conf.is_ortho_multi:
-                self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
-                self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
-                self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=10)
+                self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)
+                self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)
+                self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)
             else:
                 # hidden_dim_enc = 512
                 # hidden_dim_mid = 512
@@ -310,7 +312,7 @@ class EmbedReturn(NamedTuple):
 
 class TimeStyleSeperateEmbed(nn.Module):
     # embed only style
-    def __init__(self, time_channels, time_out_channels, is_ortho=False):
+    def __init__(self, time_channels, time_out_channels, is_ortho=False, diag_size=10):
         super().__init__()
         self.time_embed = nn.Sequential(
             linear(time_channels, time_out_channels),
@@ -319,7 +321,7 @@ class TimeStyleSeperateEmbed(nn.Module):
         )
         # self.style = nn.Identity() # mlp
         if is_ortho:
-            self.style = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=is_ortho, diag_size=10)
+            self.style = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=is_ortho, diag_size=diag_size)
         else:
             self.style = nn.Linear(512, 512)
 
