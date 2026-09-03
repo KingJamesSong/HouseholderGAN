@@ -12,6 +12,8 @@ from templates import *
 from templates_latent import *
 
 import lpips
+import json
+import os
 
 
 def normalize(x):
@@ -75,6 +77,12 @@ if __name__ == "__main__":
         help="set endpoint sampling method",
     )
     parser.add_argument("--ckpt", type=str, required=True, help="diffae checkpoints")
+    parser.add_argument(
+        "--rank",
+        type=int,
+        default=None,
+        help="Householder projector diag_size / rank; if set, use rank ablation config",
+    )
 
     data_path = 'datasets/ffhq256.lmdb'
 
@@ -82,7 +90,10 @@ if __name__ == "__main__":
 
     latent_dim = 512
     ckpt = torch.load(args.ckpt)
-    conf = ffhq128_autoenc_130M()
+    if args.rank is not None:
+        conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+    else:
+        conf = ffhq128_autoenc_130M()
 
     model = LitModel(conf)
     state = torch.load(args.ckpt, map_location='cpu')
@@ -193,5 +204,17 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish ffhq multi projector ppl!\n", filtered_dist.mean())
-    print("ppl ffhq multi projector eps 1e-1:", filtered_dist.mean())
+    ppl = float(filtered_dist.mean())
+    print("finish ffhq multi projector ppl!\n", ppl)
+    print(f"ppl ffhq rank{args.rank} eps {args.eps}:", ppl)
+    out_name = conf.name if args.rank is not None else 'ffhq128_autoenc_ppl'
+    os.makedirs('evals', exist_ok=True)
+    with open(f'evals/{out_name}_ppl.txt', 'a') as f:
+        f.write(json.dumps({
+            'ppl': ppl,
+            'eps': args.eps,
+            'sampling': args.sampling,
+            'n_sample': args.n_sample,
+            'ckpt': args.ckpt,
+            'rank': args.rank,
+        }) + '\n')

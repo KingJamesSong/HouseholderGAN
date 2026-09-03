@@ -6,6 +6,8 @@ import numpy as np
 from tqdm import tqdm
 import math
 import lpips
+import json
+import os
 from experiment import LitModel
 from templates import *
 from templates_latent import *
@@ -75,6 +77,12 @@ if __name__ == "__main__":
         type=str,
         help="name of the closed form factorization result factor file",
     )
+    parser.add_argument(
+        "--rank",
+        type=int,
+        default=None,
+        help="Householder projector diag_size / rank; if set, use rank ablation config",
+    )
 
     args = parser.parse_args()
 
@@ -82,14 +90,18 @@ if __name__ == "__main__":
     #Load factor
     print('args', args.factor)
     eigvec_dict = torch.load(args.factor)
-    ema_key = [key for key in eigvec_dict.keys() if key.startswith('ema_')]
-    len_key = len(ema_key)
-    # ema_value = eigvec_dict[ema_key]
-    print(f"Using EMA key: {ema_key}")
+    ema_items = [(k, v) for k, v in eigvec_dict.items() if k.startswith('ema_')]
+    if not ema_items:
+        ema_items = list(eigvec_dict.items())
+    print(f"Using EMA keys: {[k for k, _ in ema_items]}")
     #Load checkpoint
     ckpt = torch.load(args.ckpt)
 
-    conf = ffhq128_autoenc_130M()
+    if args.rank is not None:
+        conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+    else:
+        conf = ffhq128_autoenc_130M()
+    rank = args.rank if args.rank is not None else 10
 
     model = LitModel(conf)
     state = torch.load(args.ckpt, map_location='cpu')
@@ -134,9 +146,9 @@ if __name__ == "__main__":
             latent_t0, latent_t1 = cond[::2], cond[1::2]
             latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
             #Random Eigenvector Direction
-            key = np.random.randint(0, len_key)
-            j = np.random.randint(0, 10)
-            value_list = list(eigvec_dict.values())[key]
+            key = np.random.randint(0, len(ema_items))
+            j = np.random.randint(0, min(rank, ema_items[key][1].shape[1]))
+            value_list = ema_items[key][1]
             direction = value_list[:, j].unsqueeze(0).to(cond.device)
             direction = direction / direction.norm() 
             latent_e1 = lerp(latent_t0, latent_t1, lerp_t[:, None]) + args.eps * direction
@@ -185,5 +197,18 @@ if __name__ == "__main__":
         np.logical_and(lo <= distances, distances <= hi), distances
     )
 
-    print("finish ffhq multi projector pipl!\n", filtered_dist.mean())
-    print("pipl ffhq multi projector eps 1e-1:", filtered_dist.mean())
+    pipl = float(filtered_dist.mean())
+    print("finish ffhq multi projector pipl!\n", pipl)
+    print(f"pipl ffhq rank{args.rank} eps {args.eps}:", pipl)
+    out_name = conf.name if args.rank is not None else 'ffhq128_autoenc_pipl'
+    os.makedirs('evals', exist_ok=True)
+    with open(f'evals/{out_name}_pipl.txt', 'a') as f:
+        f.write(json.dumps({
+            'pipl': pipl,
+            'eps': args.eps,
+            'sampling': args.sampling,
+            'n_sample': args.n_sample,
+            'ckpt': args.ckpt,
+            'factor': args.factor,
+            'rank': args.rank,
+        }) + '\n')
