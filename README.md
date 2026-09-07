@@ -1,7 +1,7 @@
 # HouseholderGAN
 
 ICCV23 paper [Householder Projector for Unsupervised Latent Semantics Discovery](https://arxiv.org/pdf/2307.08012.pdf)
-The extended version has been set to IEEE Transactions on Circuits and Systems for Video Technology(TCSVT), and is currently under review.
+The extended version has been submitted to IEEE Transactions on Circuits and Systems for Video Technology(TCSVT), and is currently under review.
 
 <!--Eye Size          |                  Head                   |  Expression
 :-------------------------:|:---------------------------------------:|:-------------------------:
