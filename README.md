@@ -222,4 +222,4 @@ If you think the codes are helpful to your research, please consider citing our 
 
 If you have any questions or suggestions, please feel free to contact us
 
-`yue.song@unitn.it` or `jichao.zhang@unitn.it` or `chenyu.zhang@unitn.it`
+`yue.song@unitn.it` or `jichao.zhang@ouc.edu.cn` or `chenyu.zhang@unitn.it`
