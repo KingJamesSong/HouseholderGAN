@@ -83,6 +83,17 @@ if __name__ == "__main__":
         default=None,
         help="Householder projector diag_size / rank; if set, use rank ablation config",
     )
+    parser.add_argument(
+        "--out_name",
+        type=str,
+        default=None,
+        help="override evals/<out_name>_ppl.txt basename",
+    )
+    parser.add_argument(
+        "--vanilla",
+        action="store_true",
+        help="load original DiffAE (no multi projector; Identity style path)",
+    )
 
     data_path = 'datasets/ffhq256.lmdb'
 
@@ -90,15 +101,19 @@ if __name__ == "__main__":
 
     latent_dim = 512
     ckpt = torch.load(args.ckpt)
-    if args.rank is not None:
-        conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+    if args.vanilla:
+        from run_ffhq128_base_eval import load_vanilla
+        conf, model, state = load_vanilla(args.ckpt)
     else:
-        conf = ffhq128_autoenc_130M()
+        if args.rank is not None:
+            conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+        else:
+            conf = ffhq128_autoenc_130M()
 
-    model = LitModel(conf)
-    state = torch.load(args.ckpt, map_location='cpu')
-    model_state_dict = state['state_dict']
-    model.load_state_dict(model_state_dict, strict=True)
+        model = LitModel(conf)
+        state = torch.load(args.ckpt, map_location='cpu')
+        model_state_dict = state['state_dict']
+        model.load_state_dict(model_state_dict, strict=True)
 
     percept = lpips.LPIPS(net='vgg').to(device)
 
@@ -207,7 +222,10 @@ if __name__ == "__main__":
     ppl = float(filtered_dist.mean())
     print("finish ffhq multi projector ppl!\n", ppl)
     print(f"ppl ffhq rank{args.rank} eps {args.eps}:", ppl)
-    out_name = conf.name if args.rank is not None else 'ffhq128_autoenc_ppl'
+    out_name = args.out_name or (
+        'ffhq128_autoenc_130M' if args.vanilla else
+        (conf.name if args.rank is not None else 'ffhq128_autoenc_ppl')
+    )
     os.makedirs('evals', exist_ok=True)
     with open(f'evals/{out_name}_ppl.txt', 'a') as f:
         f.write(json.dumps({
@@ -217,4 +235,5 @@ if __name__ == "__main__":
             'n_sample': args.n_sample,
             'ckpt': args.ckpt,
             'rank': args.rank,
+            'vanilla': bool(args.vanilla),
         }) + '\n')

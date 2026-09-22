@@ -1,0 +1,1 @@
+{"pipl": 1.9937665462493896, "eps": 0.1, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/ffhq128_autoenc_130M/last.ckpt", "factor": "factors/ffhq128_autoenc_130M.pt", "rank": null, "n_eig": 10, "vanilla": true}

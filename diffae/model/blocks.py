@@ -366,15 +366,10 @@ class ResBlock(TimestepBlock):
                 if cond is None:
                     cond_out = None
                 else:
-                    # cond shape: [4, 512, 1, 1]
-                    try:
-                        # cond = cond['cond']
-                        cond_out = self.cond_emb_layers(cond).type(h.dtype)
-                    except:
-                        print("cond:", cond)
-                        print("cond shape", cond.shape)
-                        print("cond_emb_layers", self.cond_emb_layers)
-                        pdb.set_trace()
+                    # cond shape: [B, 512]; sampler may pass {'cond': tensor}
+                    if isinstance(cond, dict):
+                        cond = cond['cond']
+                    cond_out = self.cond_emb_layers(cond).type(h.dtype)
 
                 if cond_out is not None:
                     while len(cond_out.shape) < len(h.shape):

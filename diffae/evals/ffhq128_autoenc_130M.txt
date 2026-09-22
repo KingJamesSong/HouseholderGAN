@@ -1,1 +1,1 @@
-{}
+{"fid_ema_T10_Tlatent10": 13.882887840270996, "ckpt": "checkpoints/ffhq128_autoenc_130M/last.ckpt", "global_step": 1019986}

@@ -331,9 +331,9 @@ class TimeStyleSeperateEmbed(nn.Module):
             time_emb = None
         else:
             time_emb = self.time_embed(time_emb)
-        
-        try:
-            style = self.style(cond)
-        except:
-            style = self.style(cond['cond'])
+
+        # sampler may pass {'cond': tensor}; unwrap before style / Identity
+        if isinstance(cond, dict):
+            cond = cond['cond']
+        style = self.style(cond)
         return EmbedReturn(emb=style, time_emb=time_emb, style=style)

@@ -83,6 +83,25 @@ if __name__ == "__main__":
         default=None,
         help="Householder projector diag_size / rank; if set, use rank ablation config",
     )
+    parser.add_argument(
+        "--out_name",
+        type=str,
+        default=None,
+        help="override evals/<out_name>_pipl.txt basename",
+    )
+    parser.add_argument(
+        "--vanilla",
+        action="store_true",
+        help="load original DiffAE (no multi projector; Identity style path)",
+    )
+    parser.add_argument(
+        "--n_eig",
+        type=int,
+        default=None,
+        help="only sample among the top-n_eig right singular vectors of each "
+             "factor matrix. Default: use --rank (diag_size). For fair "
+             "cross-rank comparison, set a fixed value (e.g. 5).",
+    )
 
     args = parser.parse_args()
 
@@ -97,16 +116,24 @@ if __name__ == "__main__":
     #Load checkpoint
     ckpt = torch.load(args.ckpt)
 
-    if args.rank is not None:
-        conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+    if args.vanilla:
+        from run_ffhq128_base_eval import load_vanilla
+        conf, model, state = load_vanilla(args.ckpt)
     else:
-        conf = ffhq128_autoenc_130M()
-    rank = args.rank if args.rank is not None else 10
+        if args.rank is not None:
+            conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
+        else:
+            conf = ffhq128_autoenc_130M()
+        model = LitModel(conf)
+        state = torch.load(args.ckpt, map_location='cpu')
+        model_state_dict = state['state_dict']
+        model.load_state_dict(model_state_dict, strict=True)
 
-    model = LitModel(conf)
-    state = torch.load(args.ckpt, map_location='cpu')
-    model_state_dict = state['state_dict']
-    model.load_state_dict(model_state_dict, strict=True)
+    rank = args.rank if args.rank is not None else 10
+    # Fair sampling pool: never exceed the projector diag_size / matrix width.
+    n_eig = args.n_eig if args.n_eig is not None else rank
+    n_eig = max(1, min(int(n_eig), int(rank), int(ema_items[0][1].shape[1])))
+    print(f'PIPL direction pool: n_eig={n_eig} (rank/diag_size={rank})')
 
     percept = lpips.LPIPS(net='vgg').to(device)
 
@@ -145,9 +172,13 @@ if __name__ == "__main__":
 
             latent_t0, latent_t1 = cond[::2], cond[1::2]
             latent_e0 = lerp(latent_t0, latent_t1, lerp_t[:, None])
-            #Random Eigenvector Direction
+            # Random principal direction among the top-n_eig singular vectors.
+            # For low-rank Householder W=Q(U)SQ(V), only the first diag_size
+            # right singular vectors have non-zero singular values; sampling
+            # beyond that hits the numerical nullspace and collapses PIPL.
             key = np.random.randint(0, len(ema_items))
-            j = np.random.randint(0, min(rank, ema_items[key][1].shape[1]))
+            n_dirs = min(n_eig, ema_items[key][1].shape[1])
+            j = np.random.randint(0, n_dirs)
             value_list = ema_items[key][1]
             direction = value_list[:, j].unsqueeze(0).to(cond.device)
             direction = direction / direction.norm() 
@@ -199,8 +230,11 @@ if __name__ == "__main__":
 
     pipl = float(filtered_dist.mean())
     print("finish ffhq multi projector pipl!\n", pipl)
-    print(f"pipl ffhq rank{args.rank} eps {args.eps}:", pipl)
-    out_name = conf.name if args.rank is not None else 'ffhq128_autoenc_pipl'
+    print(f"pipl ffhq rank{args.rank} eps {args.eps} n_eig {n_eig}:", pipl)
+    out_name = args.out_name or (
+        'ffhq128_autoenc_130M' if args.vanilla else
+        (conf.name if args.rank is not None else 'ffhq128_autoenc_pipl')
+    )
     os.makedirs('evals', exist_ok=True)
     with open(f'evals/{out_name}_pipl.txt', 'a') as f:
         f.write(json.dumps({
@@ -211,4 +245,6 @@ if __name__ == "__main__":
             'ckpt': args.ckpt,
             'factor': args.factor,
             'rank': args.rank,
+            'n_eig': n_eig,
+            'vanilla': bool(args.vanilla),
         }) + '\n')

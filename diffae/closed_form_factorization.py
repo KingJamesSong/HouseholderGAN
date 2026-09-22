@@ -97,7 +97,16 @@ if __name__ == "__main__":
             if ("style_enc" in k or "style_dec" in k or "style_mid" in k) and "weight" in k and "ema_model" in k
         }
 
-        # weight shape: [512, 512]
+        # vanilla DiffAE has no style_* projectors; fall back to cond_emb weights
+        if not modulate:
+            modulate = {
+                k: v
+                for k, v in ckpt['state_dict'].items()
+                if 'cond_emb_layers' in k and 'weight' in k and 'ema_model' in k
+            }
+            print(f'no style_* weights; falling back to {len(modulate)} cond_emb weights')
+
+        # weight shape: [512, 512] or [C, 512]
 
         # for k, v in modulate.items():
         #     print(f"Key: {k}, Shape: {v.shape}")

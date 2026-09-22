@@ -1,0 +1,2 @@
+{"ppl": 222.38406372070312, "eps": 0.0001, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/ffhq128_autoenc_rank5/checkpoints/epoch=56-step=124659.ckpt", "rank": 5}
+{"ppl": 7.750149726867676, "eps": 0.1, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/ffhq128_autoenc_rank5/checkpoints/epoch=56-step=124659.ckpt", "rank": 5}

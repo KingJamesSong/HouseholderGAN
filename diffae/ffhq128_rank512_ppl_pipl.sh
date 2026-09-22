@@ -3,8 +3,8 @@
 #SBATCH -A shared-mhug-staff
 #SBATCH -t 23:59:00
 #SBATCH --gres gpu:1
-#SBATCH -o o_file/eval/ffhq128_rank5_ppl_pipl%j.o
-#SBATCH -e e_file/eval/ffhq128_rank5_ppl_pipl%j.e
+#SBATCH -o o_file/eval/ffhq128_rank512_ppl_pipl%j.o
+#SBATCH -e e_file/eval/ffhq128_rank512_ppl_pipl%j.e
 
 source /nfs/data_chaos/czhang/anaconda3/bin/activate
 conda activate householdergan
@@ -15,8 +15,8 @@ export TORCH_HOME=/nfs/data_chaos/czhang/torch_hub
 export XDG_CACHE_HOME=/nfs/data_chaos/czhang/.cache
 mkdir -p "$TORCH_HOME/checkpoints" "$XDG_CACHE_HOME"
 
-RANK=5
-CKPT=checkpoints/ffhq128_autoenc_rank5/checkpoints/epoch=56-step=124659.ckpt
+RANK=512
+CKPT=checkpoints/ffhq128_autoenc_rank512/checkpoints/epoch=67-step=146875.ckpt
 FACTOR=factors/ffhq128_autoenc_rank${RANK}.pt
 OUT=out_file/eval/ffhq128_rank${RANK}_ppl_pipl.out
 

@@ -1,0 +1,1 @@
+{"ppl": 8.393071174621582, "eps": 0.1, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/ffhq128_autoenc_130M/last.ckpt", "rank": null, "vanilla": true}
