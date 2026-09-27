@@ -42,6 +42,45 @@ class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
                 x = layer(x)
         return x
 
+class low_rank_projection_layer(th.nn.Module):
+    """LoRA-style low-rank projector: P(c) = A (B c) + b, rank(W)=r.
+
+    A: (out_dim, r), B: (r, in_dim), W = A @ B.
+    """
+
+    def __init__(self,
+                 in_dim: int = 512,
+                 out_dim: int = 512,
+                 rank: int = 10,
+                 bias: bool = True,
+                 bias_init: float = 1):
+        super().__init__()
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        self.rank = int(rank)
+        # match user init: random A/B; bias ones
+        self.A = th.nn.Parameter(th.randn(out_dim, self.rank) * 0.05)
+        self.B = th.nn.Parameter(th.randn(self.rank, in_dim) * 0.05)
+        if bias:
+            self.bias = th.nn.Parameter(th.zeros(out_dim).fill_(bias_init))
+        else:
+            self.bias = None
+
+    def weight_matrix(self):
+        return self.A.mm(self.B)
+
+    def forward(self, input):
+        if len(input.shape) == 4:
+            input = input.permute(0, 2, 3, 1)
+            mid = F.linear(input, self.B)
+            out = F.linear(mid, self.A, bias=self.bias)
+            out = out.permute(0, 3, 1, 2)
+        else:
+            mid = F.linear(input, self.B)
+            out = F.linear(mid, self.A, bias=self.bias)
+        return out
+
+
 class projection_layer(nn.Module):
     def __init__(self,
                  in_dim: int = None,

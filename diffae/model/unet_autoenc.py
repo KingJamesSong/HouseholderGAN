@@ -7,7 +7,7 @@ from torch.nn.functional import silu
 from .latentnet import *
 from .unet import *
 from choices import *
-from .blocks import projection_layer
+from .blocks import projection_layer, low_rank_projection_layer
 
 
 @dataclass
@@ -23,6 +23,8 @@ class BeatGANsAutoencConfig(BeatGANsUNetConfig):
     is_ortho: bool = False
     is_ortho_multi: bool = True
     use_mlp_multi: bool = True
+    # LoRA-style low-rank style projectors (A @ B); mutually exclusive with is_ortho_multi
+    use_low_rank_multi: bool = False
     diag_size: int = 10
 
     def make_model(self):
@@ -67,7 +69,15 @@ class BeatGANsAutoencModel(BeatGANsUNetModel):
 
         
         if conf.use_mlp_multi:
-            if conf.is_ortho_multi:
+            if conf.use_low_rank_multi:
+                r = conf.diag_size
+                self.style_enc = low_rank_projection_layer(
+                    in_dim=512, out_dim=512, rank=r, bias_init=1)
+                self.style_mid = low_rank_projection_layer(
+                    in_dim=512, out_dim=512, rank=r, bias_init=1)
+                self.style_dec = low_rank_projection_layer(
+                    in_dim=512, out_dim=512, rank=r, bias_init=1)
+            elif conf.is_ortho_multi:
                 self.style_enc = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)
                 self.style_mid = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)
                 self.style_dec = projection_layer(in_dim=512, out_dim=512, bias_init=1, is_ortho=conf.is_ortho_multi, diag_size=conf.diag_size)

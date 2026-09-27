@@ -37,6 +37,12 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--is_lora",
+        action="store_true",
+        help="factorize LoRA-style projectors via W = A @ B then SVD(W)",
+    )
+
+    parser.add_argument(
         "--diag_size",
         type=int,
         default=10,
@@ -47,7 +53,23 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.is_ortho:
+    if args.is_lora:
+        ckpt = torch.load(args.ckpt)
+        eigvec_ = {}
+        prefixes = set()
+        for k in ckpt['state_dict']:
+            if k.startswith('ema_model.style_') and (k.endswith('.A')
+                                                     or k.endswith('.B')):
+                prefixes.add(k.rsplit('.', 1)[0])
+        for prefix in sorted(prefixes):
+            A = ckpt['state_dict'][prefix + '.A']
+            B = ckpt['state_dict'][prefix + '.B']
+            weight = A.mm(B)
+            print(prefix, weight.shape, 'effective_rank<=', min(A.shape[1], B.shape[0]))
+            # store under .B key so pipl can treat like ortho V factors
+            eigvec_[prefix + '.B'] = torch.svd(weight).V.to('cpu')
+        torch.save(eigvec_, args.out)
+    elif args.is_ortho:
         ckpt = torch.load(args.ckpt)
         # ckpt keys: ['epoch', 'global_step', 'pytorch-lightning_version', 'state_dict', 'loops', 'callbacks', 'optimizer_states', 'lr_schedulers', 'MixedPrecision', 'hparams_name', 'hyper_parameters']
 

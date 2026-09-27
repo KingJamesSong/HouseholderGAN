@@ -388,6 +388,9 @@ class TrainConfig(BaseConfig):
             else:
                 raise NotImplementedError()
 
+            # Preserve projector flags if already set on conf.model_conf
+            # (LitModel calls make_model_conf() again and would otherwise reset them).
+            prev = getattr(self, 'model_conf', None)
             self.model_conf = cls(
                 attention_resolutions=self.net_attn,
                 channel_mult=self.net_ch_mult,
@@ -419,6 +422,11 @@ class TrainConfig(BaseConfig):
                 net_beatgans_resnet_use_zero_module,
                 latent_net_conf=latent_net_conf,
                 resnet_cond_channels=self.net_beatgans_resnet_cond_channels,
+                is_ortho=getattr(prev, 'is_ortho', False),
+                is_ortho_multi=getattr(prev, 'is_ortho_multi', True),
+                use_mlp_multi=getattr(prev, 'use_mlp_multi', True),
+                use_low_rank_multi=getattr(prev, 'use_low_rank_multi', False),
+                diag_size=getattr(prev, 'diag_size', 10),
             )
         else:
             raise NotImplementedError(self.model_name)

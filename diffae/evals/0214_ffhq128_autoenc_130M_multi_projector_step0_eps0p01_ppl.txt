@@ -1,0 +1,1 @@
+{"ppl": 0.0032787222880870104, "eps": 0.01, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/0214_ffhq128_autoenc_130M_multi_projector/checkpoints/step=0.ckpt", "rank": 10, "vanilla": false}

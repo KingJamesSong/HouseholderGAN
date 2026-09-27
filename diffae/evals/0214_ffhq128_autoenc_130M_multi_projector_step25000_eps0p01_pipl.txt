@@ -1,0 +1,1 @@
+{"pipl": 0.0853089913725853, "eps": 0.01, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/0214_ffhq128_autoenc_130M_multi_projector/checkpoints/step=25000.ckpt", "factor": "factors/0214_ffhq128_autoenc_130M_multi_projector_step25000.pt", "rank": 10, "n_eig": 10, "vanilla": false}
