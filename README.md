@@ -164,6 +164,9 @@ wait
 ## Usage of DiffAE
 See the [DiffAE README](diffae/README.md) for training, testing, evaluation, and model weights.
 
+## Usage of 3D
+See the [EG3D README](3D/README.md) for training, testing, evaluation, and model weights.
+
 ## Fine-tuned and Pre-trained Models
 
 We release the pre-trained StyleGANs and our fine-tuned models on different resolutions.
