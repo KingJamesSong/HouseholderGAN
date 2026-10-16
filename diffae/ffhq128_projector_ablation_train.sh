@@ -7,6 +7,7 @@
 #SBATCH -e e_file/train/0927_ffhq128_proj_ablation_%j.e
 
 # Usage:
+#   sbatch --export=METHOD=householder,RANK=5   ffhq128_projector_ablation_train.sh
 #   sbatch --export=METHOD=householder,RANK=10  ffhq128_projector_ablation_train.sh
 #   sbatch --export=METHOD=householder,RANK=512 ffhq128_projector_ablation_train.sh
 #   sbatch --export=METHOD=lora,RANK=10         ffhq128_projector_ablation_train.sh

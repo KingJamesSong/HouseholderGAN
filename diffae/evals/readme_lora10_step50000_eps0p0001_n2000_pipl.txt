@@ -1,0 +1,1 @@
+{"pipl": 0.3378359079360962, "std": 3.6842098236083984, "raw_count": 2000, "count": 1981, "eps": 0.0001, "n_sample": 2000, "arm": "lora10", "ckpt": "checkpoints/0927_ffhq128_autoenc_lora10_random/checkpoints/step=50000.ckpt", "protocol": "README_LR_HOP_PPL_PIPL.md"}

@@ -1,0 +1,1 @@
+{"pipl": 183.27642822265625, "eps": 0.0001, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/0927_ffhq128_autoenc_lora10_random/checkpoints/step=50000.ckpt", "factor": "factors/0927_ffhq128_autoenc_lora10_random_step50000.pt", "rank": 10, "n_eig": 10, "vanilla": false}

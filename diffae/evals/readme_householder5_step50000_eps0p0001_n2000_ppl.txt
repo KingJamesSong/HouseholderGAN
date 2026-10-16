@@ -1,0 +1,1 @@
+{"ppl": 330.1783752441406, "std": 510.1278076171875, "raw_count": 2000, "count": 1962, "eps": 0.0001, "n_sample": 2000, "ppl_sampling": "end", "arm": "householder5", "ckpt": "checkpoints/0927_ffhq128_autoenc_rank5_svd_random/checkpoints/step=50000.ckpt", "protocol": "README_LR_HOP_PPL_PIPL.md"}

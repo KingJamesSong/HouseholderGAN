@@ -95,6 +95,11 @@ if __name__ == "__main__":
         help="load original DiffAE (no multi projector; Identity style path)",
     )
     parser.add_argument(
+        "--lora",
+        action="store_true",
+        help="load LoRA-style low-rank projectors (requires --rank)",
+    )
+    parser.add_argument(
         "--n_eig",
         type=int,
         default=None,
@@ -120,7 +125,12 @@ if __name__ == "__main__":
         from run_ffhq128_base_eval import load_vanilla
         conf, model, state = load_vanilla(args.ckpt)
     else:
-        if args.rank is not None:
+        if args.lora:
+            if args.rank is None:
+                raise SystemExit('--lora requires --rank')
+            from run_ffhq128_projector_ablation import build_conf
+            conf = build_conf('lora', args.rank)
+        elif args.rank is not None:
             conf = ffhq128_autoenc_rank_ablation(diag_size=args.rank)
         else:
             conf = ffhq128_autoenc_130M()

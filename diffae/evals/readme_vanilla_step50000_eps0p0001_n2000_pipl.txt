@@ -1,0 +1,1 @@
+{"pipl": 132.17678833007812, "std": 72.20941925048828, "raw_count": 2000, "count": 1962, "eps": 0.0001, "n_sample": 2000, "arm": "vanilla", "ckpt": "checkpoints/ffhq128_autoenc_130M/last.ckpt", "protocol": "README_LR_HOP_PPL_PIPL.md"}

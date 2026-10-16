@@ -1,0 +1,1 @@
+{"ppl": 0.16806741058826447, "eps": 0.01, "sampling": "full", "n_sample": 5000, "ckpt": "checkpoints/0927_ffhq128_autoenc_lora10_random/checkpoints/step=20000.ckpt", "rank": 10, "vanilla": false}

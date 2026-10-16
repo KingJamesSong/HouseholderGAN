@@ -9,6 +9,7 @@ Three arms (random projector init, cold-start from DiffAE backbone):
 Save at 20k and 50k (+ step=0).
 
 Usage:
+  python run_ffhq128_projector_ablation.py --method householder --rank 5
   python run_ffhq128_projector_ablation.py --method householder --rank 10
   python run_ffhq128_projector_ablation.py --method householder --rank 512
   python run_ffhq128_projector_ablation.py --method lora --rank 10
@@ -29,6 +30,7 @@ DATE_TAG = '0927'  # experiment start date
 SAVE_STEPS = (20_000, 50_000)
 MAX_STEPS = 50_000
 INIT_CKPT = 'checkpoints/ffhq128_autoenc_130M/last.ckpt'
+HOUSEHOLDER_RANKS = (5, 10, 512)
 
 
 def exp_name(method: str, rank: int) -> str:
@@ -218,8 +220,9 @@ def parse_args():
     p.add_argument('--step', type=int, default=None)
     p.add_argument('--gpus', type=int, nargs='+', default=[0])
     args = p.parse_args()
-    if args.method == 'householder' and args.rank not in (10, 512):
-        raise SystemExit('householder rank must be 10 or 512 for this ablation')
+    if args.method == 'householder' and args.rank not in HOUSEHOLDER_RANKS:
+        raise SystemExit(
+            f'householder rank must be one of {HOUSEHOLDER_RANKS}')
     if args.method == 'lora' and args.rank != 10:
         raise SystemExit('lora ablation uses rank=10 (A:512x10, B:10x512)')
     return args
